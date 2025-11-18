@@ -75,13 +75,3 @@ callgrind.out.*
 # Arquivos de cobertura de código
 *.info
 coverage/
-
-# Arquivos específicos do raylib (bibliotecas locais incluídas no projeto)
-# Descomente as linhas abaixo se quiser IGNORAR as bibliotecas raylib:
-# lib/
-# libwin/
-# includes/
-
-# Nota: Para projeto educacional, é recomendado INCLUIR as bibliotecas
-# para facilitar setup dos alunos. Para projetos profissionais,
-# prefira usar pkg-config e ignore essas pastas.
