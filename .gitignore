@@ -1,0 +1,87 @@
+# Executáveis
+planetadotesouro
+planetadotesouro.exe
+*.exe
+*.out
+a.out
+
+# Arquivos objeto
+*.o
+*.obj
+
+# Arquivos de debug
+*.dSYM/
+*.su
+*.idb
+*.pdb
+core
+
+# Arquivos temporários do compilador
+*.i*86
+*.x86_64
+*.hex
+
+# Arquivos de cache do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos do Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Arquivos do CLion/IntelliJ
+.idea/
+cmake-build-*/
+
+# Arquivos do Code::Blocks
+*.depend
+*.layout
+*.cbp
+
+# Arquivos do Dev-C++
+*.dev
+
+# Arquivos de log
+*.log
+
+# Arquivos de backup
+*~
+*.bak
+*.swp
+*.tmp
+
+# Diretórios de build
+build/
+bin/
+obj/
+
+# Arquivos gerados pelo pkg-config
+*.pc
+
+# Arquivos de configuração local
+config.local
+*.conf.local
+
+# Arquivos de profiling
+gmon.out
+*.gcda
+*.gcno
+*.gcov
+
+# Arquivos do Valgrind
+vgcore.*
+callgrind.out.*
+
+# Arquivos de cobertura de código
+*.info
+coverage/
+
+# Arquivos específicos do raylib (bibliotecas locais incluídas no projeto)
+# Descomente as linhas abaixo se quiser IGNORAR as bibliotecas raylib:
+# lib/
+# libwin/
+# includes/
+
+# Nota: Para projeto educacional, é recomendado INCLUIR as bibliotecas
+# para facilitar setup dos alunos. Para projetos profissionais,
+# prefira usar pkg-config e ignore essas pastas.
