@@ -5,13 +5,12 @@
 #define RED "\x1b[31m"
 #define GREEN "\x1b[32m"
 
-int tamanhoMapa(FILE *arq, int *linhas, int *colunas){
-    // Lê os dois primeiros números da primeira linha
-    if(fscanf(arq, "%d %d", linhas, colunas) != 2){
-        printf(RED"Erro ao ler dimensões do mapa.\n");
-        return 0; // Falha
+int tamanhoMapa(FILE *arq, int *linhas, int *colunas, int *totalTesouros){
+    if(fscanf(arq, "%d %d %d", linhas, colunas, totalTesouros) != 3){
+        printf(RED"Erro ao ler dimensões e quantidade de tesouros do mapa.\n");
+        return 0;
     }
-    return 1; // Sucesso
+    return 1;
 }
 
 void mostrarMapa(char **mapa, int linhas){
@@ -30,22 +29,23 @@ void liberaMapa(Mapa *mapa){
     mapa->dados = NULL;
     mapa->linhas = 0;
     mapa->colunas = 0;
+    mapa->totalTesouros = 0;
 
     printf(GREEN "Memória do mapa liberada com sucesso.\n");
 }
 
 Mapa carregaMapa(){
-    Mapa mapa = {NULL, 0, 0};
+    Mapa mapa = {NULL, 0, 0, 0};
 
-    FILE *arq = fopen("mapas/mapa1.txt", "r");
+    FILE *arq = fopen("mapas/mapa2.txt", "r");
     if (arq == NULL) {
         printf(RED "Erro ao abrir o arquivo de mapa.\n");
         return mapa;
     }
 
-    // Captura as dimensões do mapa da primeira linha
-    if(tamanhoMapa(arq, &mapa.linhas, &mapa.colunas)){
-        //printf("Mapa carregado: %d linhas x %d colunas\n", mapa.linhas, mapa.colunas);
+    // Captura as dimensões e quantidade de tesouros da primeira linha
+    if(tamanhoMapa(arq, &mapa.linhas, &mapa.colunas, &mapa.totalTesouros)){
+        printf("Mapa carregado: %d linhas x %d colunas, %d tesouros\n", mapa.linhas, mapa.colunas, mapa.totalTesouros);
         
         mapa.dados = malloc(mapa.linhas * sizeof(char*));
         for(int i = 0; i < mapa.linhas; i++){
