@@ -35,6 +35,7 @@ void desenhaMapa(Mapa mapa){
                 case '@': color = BLUE; break; // Jogador
                 case 'T': color = YELLOW; break; // Tesouro
                 case 'I': color = GRAY; break;
+                case 'C': color = GREEN; break; // Cura
                 case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
                     color = PURPLE; break; // Portal numerado
                 default: color = LIGHTGRAY; break; // Espaço vazio
@@ -101,7 +102,7 @@ int main(){
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Planeta do Tesouro");
     listarMapasDisponiveis();
 
-    int fase = 4;
+    int fase = 5;
     int vidasIniciais = 3;
 
     Inimigo* inimigo;

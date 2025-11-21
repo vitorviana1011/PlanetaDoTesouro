@@ -85,6 +85,14 @@ Mapa carregaMapa(int fase, Inimigo **inimigos) {
     if(tamanhoMapa(arq, &mapa.linhas, &mapa.colunas)){
         printf("Mapa carregado: %d linhas x %d colunas\n", mapa.linhas, mapa.colunas);
         
+        // Validar tamanho máximo permitido
+        if(mapa.linhas > MAX_LINHAS || mapa.colunas > MAX_COLUNAS){
+            printf(RED_TEXT "ERRO: Mapa muito grande! Máximo permitido: %dx%d\n" RESET, MAX_LINHAS, MAX_COLUNAS);
+            printf("Tamanho atual: %dx%d\n", mapa.linhas, mapa.colunas);
+            fclose(arq);
+            return (Mapa){NULL, 0, 0, 0, 0};
+        }
+        
         mapa.dados = malloc(mapa.linhas * sizeof(char*));
         for(int i = 0; i < mapa.linhas; i++){
             mapa.dados[i] = malloc((mapa.colunas + 1) * sizeof(char));

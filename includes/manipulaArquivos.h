@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// Limites do mapa
+#define MAX_LINHAS 30
+#define MAX_COLUNAS 30
+
 // Forward declaration para evitar dependência circular
 typedef struct {
     int x;

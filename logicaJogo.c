@@ -109,6 +109,11 @@ void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroC
         return; 
     }
 
+    if (mapa->dados[novoY][novoX] == 'C') {
+        jogador->vidas++;
+        mapa->dados[novoY][novoX] = '.';
+    }
+
     if (mapa->dados[novoY][novoX] >= '1' && mapa->dados[novoY][novoX] <= '9') {
         verificaPortalNumerado(jogador, mapa, novoY, novoX);
         return;
@@ -134,28 +139,36 @@ void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroC
     mapa->dados[jogador->y][jogador->x] = '@';
 }
 
-// Função auxiliar para verificar se uma posição deveria ter um portal
+// Versão O(n) otimizada - apenas UMA passada pelo mapa
 char verificaPortalNaPosicao(Mapa *mapa, int x, int y) {
-    // Procurar todos os portais no mapa
+    int contadores[10] = {0}; // Para '0'-'9'
+    char resultado = '.';
+    
+    // Uma única passada pelo mapa - O(n)
     for (int i = 0; i < mapa->linhas; i++) {
         for (int j = 0; j < mapa->colunas; j++) {
-            if (mapa->dados[i][j] >= '1' && mapa->dados[i][j] <= '9') {
-                char portalNum = mapa->dados[i][j];
-                // Verificar se há um par para este portal
-                for (int ii = 0; ii < mapa->linhas; ii++) {
-                    for (int jj = 0; jj < mapa->colunas; jj++) {
-                        if (mapa->dados[ii][jj] == portalNum && (ii != i || jj != j)) {
-                            // Há um par! Verificar se a posição (x,y) corresponde a um dos portais
-                            if ((i == y && j == x) || (ii == y && jj == x)) {
-                                return portalNum;
-                            }
-                        }
-                    }
+            char tile = mapa->dados[i][j];
+            if (tile >= '1' && tile <= '9') {
+                int idx = tile - '0';
+                contadores[idx]++;
+                
+                // Se esta posição é a que estamos procurando
+                if (i == y && j == x) {
+                    resultado = tile;
                 }
             }
         }
     }
-    return '.'; // Não é um portal
+    
+    // Verificar se o portal encontrado tem par (count >= 2)
+    if (resultado >= '1' && resultado <= '9') {
+        int idx = resultado - '0';
+        if (contadores[idx] >= 2) {
+            return resultado;
+        }
+    }
+    
+    return '.';
 }
 
 // No mapa: '1' e '1' são um par, '2' e '2' são outro par
