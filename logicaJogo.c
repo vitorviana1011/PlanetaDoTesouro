@@ -48,6 +48,25 @@ void proximaFase(Mapa *mapa, Jogador *jogador, int *statusJogo, int *tesouroCole
     }
 }
 
+void verificaColisaoComInimigos(Jogador *jogador, Inimigo *inimigos, Mapa *mapa, int *statusJogo) {
+    if (inimigos == NULL) return;
+    
+    double tempoAtual = GetTime();
+    
+    // Só verificar colisão se o jogador não estiver invencível
+    if (tempoAtual > jogador->tempoInvencibilidade) {
+        for (int i = 0; i < mapa->totalInimigos; i++) {
+            if (jogador->x == inimigos[i].x && jogador->y == inimigos[i].y) {
+                // Colisão detectada!
+                jogador->vidas--;
+                jogador->tempoInvencibilidade = tempoAtual + 2.0; // 2 segundos de invencibilidade
+                verificaGameOver(jogador, statusJogo);
+                return;
+            }
+        }
+    }
+}
+
 void verificaGameOver(Jogador *jogador, int *statusJogo) {
     if (jogador->vidas <= 0) {
         *statusJogo = GAME_OVER;

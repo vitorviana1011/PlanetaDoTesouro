@@ -51,6 +51,15 @@ void proximaFase(Mapa *mapa, Jogador *jogador, int *statusJogo, int *tesouroCole
 void verificaGameOver(Jogador *jogador, int *statusJogo);
 
 /**
+ * @brief Verifica colisão entre jogador e inimigos
+ * @param jogador Ponteiro para o jogador
+ * @param inimigos Array de inimigos
+ * @param mapa Ponteiro para o mapa
+ * @param statusJogo Ponteiro para o status do jogo
+ */
+void verificaColisaoComInimigos(Jogador *jogador, Inimigo *inimigos, Mapa *mapa, int *statusJogo);
+
+/**
  * @brief Processa movimento do jogador e lógica de coleta
  * @param jogador Ponteiro para o jogador
  * @param mapa Ponteiro para o mapa

@@ -82,7 +82,7 @@ int main(){
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Planeta do Tesouro");
     listarMapasDisponiveis();
 
-    int fase = 2;
+    int fase = 4;
     int vidasIniciais = 3;
 
     Inimigo* inimigo;
@@ -100,11 +100,14 @@ int main(){
         // --- Lógica ---
         movePersonagem(&jogador, &mapa, &statusJogo, &tesouroColetados);
         
-        // Mover inimigo independentemente (só se o jogo estiver ativo)
+        // Mover todos os inimigos independentemente (só se o jogo estiver ativo)
         if (inimigo != NULL && statusJogo == JOGANDO) {
-            andaInimigo(&jogador, inimigo, &mapa);
-            // Verificar game over após movimento do inimigo
-            verificaGameOver(&jogador, &statusJogo);
+            for (int i = 0; i < mapa.totalInimigos; i++) {
+                andaInimigo(&jogador, &inimigo[i], &mapa);
+            }
+            
+            // Verificar colisão após movimento de todos os inimigos
+            verificaColisaoComInimigos(&jogador, inimigo, &mapa, &statusJogo);
         }
 
         if (statusJogo == ENTRE_FASES) {

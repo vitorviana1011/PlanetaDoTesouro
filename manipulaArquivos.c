@@ -5,8 +5,8 @@
 #include "includes/inimigo.h"
 #include "includes/manipulaArquivos.h"
 
-#define RED "\x1b[31m"
-#define GREEN "\x1b[32m"
+#define RED_TEXT "\x1b[31m"
+#define GREEN_TEXT "\x1b[32m"
 #define RESET "\x1b[0m"
 
 bool arquivoExiste(const char *caminho) {
@@ -15,7 +15,7 @@ bool arquivoExiste(const char *caminho) {
 
 int tamanhoMapa(FILE *arq, int *linhas, int *colunas){
     if(fscanf(arq, "%d %d", linhas, colunas) != 2){
-        printf(RED"Erro ao ler dimensões do mapa.\n"RESET);
+        printf(RED_TEXT"Erro ao ler dimensões do mapa.\n"RESET);
         return 0;
     }
     return 1;
@@ -41,6 +41,7 @@ void contarElementosMapa(Mapa mapa, int *totalTesouros, int *totalInimigos, Inim
                 (*inimigos)[(*totalInimigos) - 1].x = j;
                 (*inimigos)[(*totalInimigos) - 1].y = i;
                 (*inimigos)[(*totalInimigos) - 1].velocidade = 0.5;
+                (*inimigos)[(*totalInimigos) - 1].ultimoMovimento = 0.0;
             }
         }
     }
@@ -57,7 +58,7 @@ void liberaMapa(Mapa *mapa){
     mapa->linhas = 0;
     mapa->colunas = 0;
 
-    printf(GREEN "Memória do mapa liberada com sucesso.\n" RESET);
+    printf(GREEN_TEXT "Memória do mapa liberada com sucesso.\n" RESET);
 }
 
 Mapa carregaMapa(int fase, Inimigo **inimigos) {
@@ -67,15 +68,15 @@ Mapa carregaMapa(int fase, Inimigo **inimigos) {
 
     // Verifica se o arquivo existe antes de tentar abrir
     if (arquivoExiste(caminho)) {
-        printf(GREEN "Arquivo '%s' encontrado.\n Carregando mapa...\n" RESET, caminho);
+        printf(GREEN_TEXT "Arquivo '%s' encontrado.\n Carregando mapa...\n" RESET, caminho);
     } else {
-        printf(RED "Acabou as fases ou o arquivo '%s' não foi encontrado.\n" RESET, caminho);
+        printf(RED_TEXT "Acabou as fases ou o arquivo '%s' não foi encontrado.\n" RESET, caminho);
         return (Mapa){NULL, 0, 0, 0, 0};
     }
 
     FILE *arq = fopen(caminho, "r");
     if (arq == NULL) {
-        printf(RED "Erro ao abrir o arquivo '%s'.\n" RESET, caminho);
+        printf(RED_TEXT "Erro ao abrir o arquivo '%s'.\n" RESET, caminho);
         printf("O arquivo existe mas não pode ser lido.\n");
         return mapa;
     }
@@ -114,7 +115,7 @@ void listarMapasDisponiveis(void) {
         snprintf(caminho, sizeof(caminho), "mapas/mapa%d.txt", i);
         
         if (arquivoExiste(caminho)) {
-            printf(GREEN "✓ %s - Disponível\n" RESET, caminho);
+            printf(GREEN_TEXT "✓ %s - Disponível\n" RESET, caminho);
         } else {
             printf("✗ %s - Não encontrado\n", caminho);
         }

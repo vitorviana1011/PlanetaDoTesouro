@@ -10,6 +10,7 @@ typedef struct {
     int x;
     int y;
     float velocidade;
+    double ultimoMovimento;
 } Inimigo;
 
 typedef struct {

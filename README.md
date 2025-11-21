@@ -29,6 +29,16 @@ Jogo de labirinto 2D em C usando Raylib. O jogador (`@`) navega pelo labirinto c
 | `#` | Parede |
 | `.` | Caminho livre |
 | `T` | Tesouro |
+| `I` | Inimigo |
+
+## Inimigos
+
+Inimigos (`I`) se movem automaticamente em direção ao jogador usando IA simples. Características:
+
+- **Movimento**: Perseguem o jogador horizontalmente, depois verticalmente (0.5s entre movimentos)
+- **Colisão**: Reduz vidas do jogador e ativa invencibilidade temporária (pisca)
+- **Renderização**: Desenhados por cima do mapa sem apagar tesouros
+- **Game Over**: Ocorre quando vidas chegam a zero
 
 ## Instalação
 
@@ -68,7 +78,7 @@ sudo apt install libraylib-dev
 ....#
 #T#T#
 #...#
-###..
+###I.
 ```
 
 **Primeira linha**: `linhas colunas quantidade_tesouros`

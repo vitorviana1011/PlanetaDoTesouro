@@ -1,17 +1,16 @@
 #include "includes/raylib.h"
 #include "includes/inimigo.h"
+#include <stdio.h>
 
-#define RED "\x1b[31m"
+#define RED_TEXT "\x1b[31m"
 #define RESET "\x1b[0m"
-
-static double ultimoMovimento = 0.0;
 
 void andaInimigo(Jogador *jogador, Inimigo *inimigo, Mapa *mapa) {
     // Usar GetTime() para controle de velocidade não-bloqueante
     double tempoAtual = GetTime();
     
     // Verificar se passou tempo suficiente desde o último movimento (baseado na velocidade)
-    if (tempoAtual - ultimoMovimento < inimigo->velocidade) {
+    if (tempoAtual - inimigo->ultimoMovimento < inimigo->velocidade) {
         return; // Ainda não é hora de mover
     }
     
@@ -34,7 +33,6 @@ void andaInimigo(Jogador *jogador, Inimigo *inimigo, Mapa *mapa) {
         }
     }
     
-    // Se não se moveu horizontalmente, tentar verticalmente
     if (novoX == inimigo->x) {
         if (jogador->y < inimigo->y) {
             // Verificar se pode mover para cima
@@ -56,30 +54,11 @@ void andaInimigo(Jogador *jogador, Inimigo *inimigo, Mapa *mapa) {
         return;
     }
 
-    // Verificar colisão com jogador
-    if (novoX == jogador->x && novoY == jogador->y) {
-        // Só causar dano se o jogador não estiver invencível
-        if (tempoAtual > jogador->tempoInvencibilidade) {
-            // Colisão detectada! Reduzir vida do jogador
-            jogador->vidas--;
-            
-            // Tornar jogador invencível por 2 segundos
-            jogador->tempoInvencibilidade = tempoAtual + 2.0;
-            
-            printf(RED"Jogador atingido! Vidas restantes: %d\n"RESET, jogador->vidas);
-        }
-        
-        // Não mover o inimigo para a posição do jogador
-        // Adicionar pequeno delay antes do próximo movimento do inimigo
-        ultimoMovimento = tempoAtual + 0.3; // Delay menor
-        return;
-    }
-        
-    
     // Atualizar APENAS a posição lógica do inimigo
+    // (A colisão será verificada depois no main loop)
     inimigo->x = novoX;
     inimigo->y = novoY;
     
     // Atualizar timestamp do último movimento
-    ultimoMovimento = tempoAtual;
+    inimigo->ultimoMovimento = tempoAtual;
 }
