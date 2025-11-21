@@ -15,7 +15,7 @@
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 
-enum {MENU = 0, JOGANDO, JOGO_COMPLETO};
+enum {MENU = 0, JOGANDO, JOGO_COMPLETO, ENTRE_FASES};
 
 typedef struct {
     int x;
@@ -68,7 +68,25 @@ bool confereTesouro(Mapa *mapa, int x, int y){
     return false;
 }
 
-void movePersonagem(Jogador *jogador, Mapa mapa, int *statusJogo, int *tesouroColetados){
+void proximaFase(Mapa *mapa, Jogador *jogador, int *statusJogo, int *tesouroColetados, int *fase){
+    int novaFase = (*fase) + 1;
+    Mapa novoMapa = carregaMapa(novaFase);
+    
+    if (novoMapa.dados != NULL) {
+        liberaMapa(mapa);
+        *mapa = novoMapa;
+        *jogador = encontrarJogador(*mapa);
+        *tesouroColetados = 0;
+        (*fase)++;
+        *statusJogo = JOGANDO;
+        //printf("Avançando para a fase %d!\n", *fase);
+    } else {
+        *statusJogo = JOGO_COMPLETO;
+        //printf("Parabéns! Você completou todas as fases!\n");
+    }
+}
+
+void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroColetados){
     int novoY = jogador->y;
     int novoX = jogador->x;
     
@@ -89,35 +107,40 @@ void movePersonagem(Jogador *jogador, Mapa mapa, int *statusJogo, int *tesouroCo
     }
     
     // Verificar limites do mapa
-    if (novoY < 0 || novoY >= mapa.linhas || novoX < 0 || novoX >= mapa.colunas) {
+    if (novoY < 0 || novoY >= mapa->linhas || novoX < 0 || novoX >= mapa->colunas) {
         return;
     }
     
     // Verificar se não é parede
-    if (mapa.dados[novoY][novoX] == '#') {
+    if (mapa->dados[novoY][novoX] == '#') {
         return; 
     }
 
-    if (confereTesouro(&mapa, novoX, novoY)) {
+    // Lógica para coletar tesouro e verificar se deve passar de fase
+    if (confereTesouro(mapa, novoX, novoY)) {
         (*tesouroColetados)++;
-        if (*tesouroColetados >= mapa.totalTesouros) {
-            *statusJogo = JOGO_COMPLETO;
+        if (*tesouroColetados >= mapa->totalTesouros) {
+            *statusJogo = ENTRE_FASES;
+            return;
         }
     }
 
     // Movimento válido - atualizar posição
-    mapa.dados[jogador->y][jogador->x] = '.';
+    mapa->dados[jogador->y][jogador->x] = '.';
     jogador->y = novoY;
     jogador->x = novoX;
-    mapa.dados[jogador->y][jogador->x] = '@';
+    mapa->dados[jogador->y][jogador->x] = '@';
 }
 
 int main(){
     // --- Inicialização ---
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Planeta do Tesouro");
+    listarMapasDisponiveis();
+    int fase = 1;
 
-    Mapa mapa = carregaMapa();
+    Mapa mapa = carregaMapa(fase);
     Jogador jogador = encontrarJogador(mapa);
+
 
     int tesouroColetados = 0;
     int statusJogo = JOGANDO;
@@ -126,7 +149,13 @@ int main(){
 
     while(!WindowShouldClose()){
         // --- Lógica ---
-        movePersonagem(&jogador, mapa, &statusJogo, &tesouroColetados);
+        movePersonagem(&jogador, &mapa, &statusJogo, &tesouroColetados);
+
+        if (statusJogo == ENTRE_FASES) {
+            if (IsKeyPressed(KEY_ENTER)) {
+                proximaFase(&mapa, &jogador, &statusJogo, &tesouroColetados, &fase);
+            }
+        }
 
         // --- Desenho ---
         BeginDrawing();
@@ -138,11 +167,15 @@ int main(){
                     // TODO: Implementar menu
                     break;
                 case JOGANDO:
-                    DrawText(TextFormat("Tesouros: %d/%d", tesouroColetados, mapa.totalTesouros), 10, 10, 20, WHITE);
+                    DrawText(TextFormat("Fase: %d", fase), 10, 10, 20, WHITE);
+                    DrawText(TextFormat("Tesouros: %d/%d", tesouroColetados, mapa.totalTesouros), 10, 35, 20, WHITE);
                     break;
                 case JOGO_COMPLETO:
                     DrawText("PARABENS! TODOS OS TESOUROS COLETADOS!", SCREEN_WIDTH / 2 - MeasureText("PARABENS! TODOS OS TESOUROS COLETADOS!", 20) / 2, 40, 20, GREEN);
                     DrawText("Pressione ESC para sair", SCREEN_WIDTH / 2 - MeasureText("Pressione ESC para sair", 20) / 2, 70, 20, YELLOW);
+                    break;
+                case ENTRE_FASES:
+                    DrawText("Fase Completa! Aperte ENTER para continuar", SCREEN_WIDTH / 2 - MeasureText("Fase Completa! Preparando próxima fase...", 20) / 2, 40, 20, GREEN);
                     break;
             }
             

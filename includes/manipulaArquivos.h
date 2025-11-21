@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct {
     char **dados;
@@ -22,6 +23,13 @@ typedef struct {
 int tamanhoMapa(FILE *arq, int *linhas, int *colunas, int *totalTesouros);
 
 /**
+ * @brief Verifica se um arquivo existe no sistema
+ * @param caminho Caminho para o arquivo a ser verificado
+ * @return true se o arquivo existe, false caso contrário
+ */
+bool arquivoExiste(const char *caminho);
+
+/**
  * @brief Exibe o mapa na tela
  * @param mapa Ponteiro para o array de strings que representa o mapa
  */
@@ -31,12 +39,17 @@ void mostrarMapa(char **mapa, int linhas);
  * @brief Carrega o mapa do arquivo e o exibe na tela
  * @return Estrutura Mapa com dados, linhas e colunas
  */
-Mapa carregaMapa(void);
+Mapa carregaMapa(int fase);
 
 /**
  * @brief Libera a memória alocada para o mapa
  * @param mapa Estrutura Mapa a ser liberada
  */
 void liberaMapa(Mapa *mapa);
+
+/**
+ * @brief Lista mapas disponíveis no diretório mapas/
+ */
+void listarMapasDisponiveis(void);
 
 #endif // MANIPULA_ARQUIVOS_H

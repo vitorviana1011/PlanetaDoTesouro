@@ -9,13 +9,17 @@ Jogo de labirinto 2D em C usando Raylib. O jogador (`@`) navega pelo labirinto c
 
 ## Funcionalidades
 
-- Sistema de múltiplos tesouros com contador
-- Carregamento de mapas de arquivos texto
-- Movimentação com setas do teclado
-- Detecção de colisões e coleta automática
-- Interface visual com status do jogo
-- Gerenciamento automático de memória
-- Estados do jogo (jogando/completo)
+- **Sistema de múltiplas fases** com progressão automática
+- **Múltiplos tesouros** por fase com contador em tempo real
+- **Verificação de arquivos** - detecta mapas disponíveis automaticamente
+- **Transição controlada** entre fases (requer ENTER para avançar)
+- **Carregamento dinâmico** de mapas de arquivos texto
+- **Movimentação fluida** com setas do teclado
+- **Detecção de colisões** e coleta automática de tesouros
+- **Interface visual** com status da fase e progresso
+- **Mapa centralizado** automaticamente na tela
+- **Gerenciamento robusto** de memória
+- **Estados do jogo** (menu/jogando/entre fases/completo)
 
 ## Elementos do Jogo
 
@@ -43,12 +47,18 @@ sudo apt install libraylib-dev
 
 ## Como Jogar
 
-- Execute: `make run`
-- **Setas do teclado** para movimento do jogador
-- **Objetivo**: coletar todos os tesouros (`E`) do mapa
-- **Interface**: contador "Tesouros: X/Y" no canto superior esquerdo
-- **Vitória**: mensagem de parabéns quando todos os tesouros forem coletados
-- **ESC** para sair a qualquer momento
+- **Execute**: `make run`
+- **Movimento**: Use as setas do teclado para navegar
+- **Objetivo**: Colete todos os tesouros (`E`) de cada fase
+- **Interface**: 
+  - `Fase: X` - Fase atual
+  - `Tesouros: X/Y` - Progresso na fase
+- **Progressão**: 
+  - Complete uma fase coletando todos os tesouros
+  - Aparecer "Fase Completa! Aperte ENTER para continuar"
+  - Pressione **ENTER** para avançar para a próxima fase
+- **Fim do jogo**: Quando não há mais fases, aparece mensagem de vitória
+- **Sair**: **ESC** a qualquer momento
 
 ## Formato do Mapa
 
@@ -65,18 +75,34 @@ sudo apt install libraylib-dev
 **Demais linhas**: grid do labirinto usando os símbolos da tabela acima
 
 ### Regras do mapa:
-- Deve haver exatamente 1 jogador (`@`)
+- Deve haver exatamente 1 jogador (`@`) por mapa
 - Quantidade de tesouros (`E`) deve corresponder ao número especificado
-- Mapa é centralizado automaticamente na tela
+- Mapas são centralizados automaticamente na tela
+- Arquivos de mapa seguem o padrão `mapas/mapaN.txt` (N = 1, 2, 3...)
+- O jogo verifica automaticamente quais mapas existem
 
 ## Comandos Make
 
 ```bash
-make run      # Compila e executa
+make run      # Compila e executa o jogo
 make clean    # Remove arquivos compilados  
-make debug    # Debugger (gdb)
+make debug    # Inicia debugger (gdb)
 make help     # Mostra ajuda do Makefile
 ```
+## Funcionalidades Técnicas
+
+- **Múltiplas fases**: Detecção automática e carregamento sob demanda de mapas
+- **Gerenciamento de memória**: Alocação dinâmica com liberação segura
+- **Estados do jogo**: JOGANDO → ENTRE_FASES → JOGO_COMPLETO
+- **Verificação de arquivos**: Evita erros de abertura de mapas inexistentes
+
+## Conceitos Demonstrados
+
+- **Estruturas e ponteiros**: Arrays 2D, passagem por referência
+- **Gerenciamento de memória**: `malloc()`, `free()` 
+- **Manipulação de arquivos**: Leitura e verificação de existência
+- **Máquina de estados**: Controle de fluxo do jogo
+- **Programação gráfica**: Biblioteca Raylib
 
 ## Autor
 
