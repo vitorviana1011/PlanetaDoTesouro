@@ -109,6 +109,11 @@ void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroC
         return; 
     }
 
+    if (mapa->dados[novoY][novoX] >= '1' && mapa->dados[novoY][novoX] <= '9') {
+        verificaPortalNumerado(jogador, mapa, novoY, novoX);
+        return;
+    }
+
     // Lógica para coletar tesouro
     if (confereTesouro(mapa, novoX, novoY)) {
         (*tesouroColetados)++;
@@ -120,8 +125,54 @@ void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroC
     }
 
     // Movimento válido - atualizar posição
-    mapa->dados[jogador->y][jogador->x] = '.';
+    // Verificar se a posição atual do jogador deveria ter um portal
+    char portalNaPosicao = verificaPortalNaPosicao(mapa, jogador->x, jogador->y);
+    mapa->dados[jogador->y][jogador->x] = portalNaPosicao;
+    
     jogador->y = novoY;
     jogador->x = novoX;
     mapa->dados[jogador->y][jogador->x] = '@';
+}
+
+// Função auxiliar para verificar se uma posição deveria ter um portal
+char verificaPortalNaPosicao(Mapa *mapa, int x, int y) {
+    // Procurar todos os portais no mapa
+    for (int i = 0; i < mapa->linhas; i++) {
+        for (int j = 0; j < mapa->colunas; j++) {
+            if (mapa->dados[i][j] >= '1' && mapa->dados[i][j] <= '9') {
+                char portalNum = mapa->dados[i][j];
+                // Verificar se há um par para este portal
+                for (int ii = 0; ii < mapa->linhas; ii++) {
+                    for (int jj = 0; jj < mapa->colunas; jj++) {
+                        if (mapa->dados[ii][jj] == portalNum && (ii != i || jj != j)) {
+                            // Há um par! Verificar se a posição (x,y) corresponde a um dos portais
+                            if ((i == y && j == x) || (ii == y && jj == x)) {
+                                return portalNum;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return '.'; // Não é um portal
+}
+
+// No mapa: '1' e '1' são um par, '2' e '2' são outro par
+void verificaPortalNumerado(Jogador *jogador, Mapa *mapa, int y, int x) {
+    char tile = mapa->dados[y][x];
+    
+    for (int i = 0; i < mapa->linhas; i++) {
+        for (int j = 0; j < mapa->colunas; j++) {
+            if (mapa->dados[i][j] == tile && (i != y || j != x)) {
+
+                mapa->dados[jogador->y][jogador->x] = '.';
+                
+                jogador->y = i;
+                jogador->x = j;
+                
+                return;
+            }
+        }
+    }
 }

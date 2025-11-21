@@ -32,13 +32,32 @@ void desenhaMapa(Mapa mapa){
             switch (tile) {
                 case '#': color = BLACK; break; // Parede
                 case '.': color = GRAY; break; // Caminho
-                case '@': color = BLUE; break; // Jogador (cor padrão)
+                case '@': color = BLUE; break; // Jogador
                 case 'T': color = YELLOW; break; // Tesouro
                 case 'I': color = GRAY; break;
+                case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+                    color = PURPLE; break; // Portal numerado
                 default: color = LIGHTGRAY; break; // Espaço vazio
             }
             DrawRectangle(offsetX + j * tileSize, offsetY + i * tileSize, tileSize, tileSize, color);
         }
+    }
+}
+
+void desenhaPortais(Mapa mapa, Jogador jogador) {
+    int tileSize = 32;
+    int mapaLargura = mapa.colunas * tileSize;
+    int mapaAltura = mapa.linhas * tileSize;
+    
+    int offsetX = (SCREEN_WIDTH - mapaLargura) / 2;
+    int offsetY = (SCREEN_HEIGHT - mapaAltura) / 2;
+    
+    // Desenhar portais onde o jogador está (se houver)
+    char portal = verificaPortalNaPosicao(&mapa, jogador.x, jogador.y);
+    if (portal >= '1' && portal <= '9') {
+        int x = offsetX + jogador.x * tileSize;
+        int y = offsetY + jogador.y * tileSize;
+        DrawRectangle(x, y, tileSize, tileSize, BLUE);
     }
 }
 
@@ -129,8 +148,9 @@ int main(){
                     DrawText(TextFormat("Fase: %d", fase), 10, 10, 20, WHITE);
                     DrawText(TextFormat("Tesouros: %d/%d", tesouroColetados, mapa.totalTesouros), 10, 35, 20, WHITE);
                     DrawText(TextFormat("Vidas: %d", jogador.vidas), 10, 60, 20, WHITE);
+                    desenhaPortais(mapa, jogador); // Desenhar portal embaixo do jogador primeiro
                     desenhaInimigos(mapa, inimigo);
-                    desenhaJogadorComEfeito(jogador, mapa);
+                    desenhaJogadorComEfeito(jogador, mapa); // Jogador por último, em cima de tudo
                     break;
                 case JOGO_COMPLETO:
                     DrawText("PARABENS! TODOS OS TESOUROS COLETADOS!", SCREEN_WIDTH / 2 - MeasureText("PARABENS! TODOS OS TESOUROS COLETADOS!", 20) / 2, 40, 20, GREEN);

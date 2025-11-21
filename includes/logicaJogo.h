@@ -68,4 +68,20 @@ void verificaColisaoComInimigos(Jogador *jogador, Inimigo *inimigos, Mapa *mapa,
  */
 void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroColetados);
 
+/**
+ * @brief Verifica se uma posição deveria ter um portal
+ * @param mapa Ponteiro para o mapa
+ * @param x Coordenada X
+ * @param y Coordenada Y
+ * @return Número do portal ou '.' se não for portal
+ */
+char verificaPortalNaPosicao(Mapa *mapa, int x, int y);
+
+/**
+ * @brief Verifica se o jogador está em um portal numerado e o teleporta
+ * @param jogador Ponteiro para o jogador
+ * @param mapa Ponteiro para o mapa
+ */
+void verificaPortalNumerado(Jogador *jogador, Mapa *mapa, int y, int x);
+
 #endif // LOGICA_JOGO_H
