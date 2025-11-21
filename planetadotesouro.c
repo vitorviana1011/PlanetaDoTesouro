@@ -11,30 +11,11 @@
 
 #include "includes/raylib.h"
 #include "includes/manipulaArquivos.h"
+#include "includes/logicaJogo.h"
+#include "includes/inimigo.h"
 
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
-
-enum {MENU = 0, JOGANDO, JOGO_COMPLETO, ENTRE_FASES};
-
-typedef struct {
-    int x;
-    int y;
-}Jogador; // Posição do jogador
-
-Jogador encontrarJogador(Mapa mapa) {
-    Jogador jogador = {0, 0};
-    for (int i = 0; i < mapa.linhas; i++) {
-        for (int j = 0; j < mapa.colunas; j++) {
-            if (mapa.dados[i][j] == '@') {
-                jogador.y = i;
-                jogador.x = j;
-                return jogador;
-            }
-        }
-    }
-    return jogador;
-}
 
 void desenhaMapa(Mapa mapa){
     int tileSize = 32;
@@ -51,8 +32,9 @@ void desenhaMapa(Mapa mapa){
             switch (tile) {
                 case '#': color = BLACK; break; // Parede
                 case '.': color = GRAY; break; // Caminho
-                case '@': color = BLUE; break; // Jogador
-                case 'E': color = YELLOW; break; // Tesouro
+                case '@': color = BLUE; break; // Jogador (cor padrão)
+                case 'T': color = YELLOW; break; // Tesouro
+                case 'I': color = GRAY; break;
                 default: color = LIGHTGRAY; break; // Espaço vazio
             }
             DrawRectangle(offsetX + j * tileSize, offsetY + i * tileSize, tileSize, tileSize, color);
@@ -60,87 +42,54 @@ void desenhaMapa(Mapa mapa){
     }
 }
 
-bool confereTesouro(Mapa *mapa, int x, int y){
-    if(mapa->dados[y][x] == 'E'){
-        mapa->dados[y][x] = '.';
-        return true;
-    }
-    return false;
-}
-
-void proximaFase(Mapa *mapa, Jogador *jogador, int *statusJogo, int *tesouroColetados, int *fase){
-    int novaFase = (*fase) + 1;
-    Mapa novoMapa = carregaMapa(novaFase);
+void desenhaInimigos(Mapa mapa, Inimigo *inimigos) {
+    if (inimigos == NULL) return;
     
-    if (novoMapa.dados != NULL) {
-        liberaMapa(mapa);
-        *mapa = novoMapa;
-        *jogador = encontrarJogador(*mapa);
-        *tesouroColetados = 0;
-        (*fase)++;
-        *statusJogo = JOGANDO;
-        //printf("Avançando para a fase %d!\n", *fase);
-    } else {
-        *statusJogo = JOGO_COMPLETO;
-        //printf("Parabéns! Você completou todas as fases!\n");
+    int tileSize = 32;
+    int mapaLargura = mapa.colunas * tileSize;
+    int mapaAltura = mapa.linhas * tileSize;
+    
+    int offsetX = (SCREEN_WIDTH - mapaLargura) / 2;
+    int offsetY = (SCREEN_HEIGHT - mapaAltura) / 2;
+    
+    // Desenhar todos os inimigos na sua posição lógica
+    for (int i = 0; i < mapa.totalInimigos; i++) {
+        int x = offsetX + inimigos[i].x * tileSize;
+        int y = offsetY + inimigos[i].y * tileSize;
+        DrawRectangle(x, y, tileSize, tileSize, RED);
     }
 }
 
-void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroColetados){
-    int novoY = jogador->y;
-    int novoX = jogador->x;
+void desenhaJogadorComEfeito(Jogador jogador, Mapa mapa){
+    int tileSize = 32;
+    int x = jogador.x * tileSize + (SCREEN_WIDTH - (tileSize *  mapa.colunas)) / 2;
+    int y = jogador.y * tileSize + (SCREEN_HEIGHT - (tileSize *  mapa.linhas)) / 2;
     
-    if (IsKeyPressed(KEY_UP)) {
-        novoY = jogador->y - 1; // UP diminui Y
-    }
-    else if (IsKeyPressed(KEY_DOWN)) {
-        novoY = jogador->y + 1; // DOWN aumenta Y
-    }
-    else if (IsKeyPressed(KEY_LEFT)) {
-        novoX = jogador->x - 1; // LEFT diminui X
-    }
-    else if (IsKeyPressed(KEY_RIGHT)) {
-        novoX = jogador->x + 1; // RIGHT aumenta X
-    }
-    else {
-        return; // Nenhuma tecla pressionada
-    }
-    
-    // Verificar limites do mapa
-    if (novoY < 0 || novoY >= mapa->linhas || novoX < 0 || novoX >= mapa->colunas) {
-        return;
-    }
-    
-    // Verificar se não é parede
-    if (mapa->dados[novoY][novoX] == '#') {
-        return; 
-    }
-
-    // Lógica para coletar tesouro e verificar se deve passar de fase
-    if (confereTesouro(mapa, novoX, novoY)) {
-        (*tesouroColetados)++;
-        if (*tesouroColetados >= mapa->totalTesouros) {
-            *statusJogo = ENTRE_FASES;
-            return;
+    // Se o jogador está invencível, fazer ele piscar
+    double tempoAtual = GetTime();
+    if (tempoAtual < jogador.tempoInvencibilidade) {
+        // Piscar a cada 0.2 segundos
+        if (((int)(tempoAtual * 5)) % 2 == 0) {
+            DrawRectangle(x, y, tileSize, tileSize, SKYBLUE); // Cor alternativa
+        } else {
+            DrawRectangle(x, y, tileSize, tileSize, BLUE); // Cor normal
         }
     }
-
-    // Movimento válido - atualizar posição
-    mapa->dados[jogador->y][jogador->x] = '.';
-    jogador->y = novoY;
-    jogador->x = novoX;
-    mapa->dados[jogador->y][jogador->x] = '@';
 }
 
 int main(){
     // --- Inicialização ---
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Planeta do Tesouro");
     listarMapasDisponiveis();
-    int fase = 1;
 
-    Mapa mapa = carregaMapa(fase);
-    Jogador jogador = encontrarJogador(mapa);
+    int fase = 2;
+    int vidasIniciais = 3;
 
+    Inimigo* inimigo;
+
+    Mapa mapa = carregaMapa(fase, &inimigo);
+
+    Jogador jogador = encontrarJogador(mapa, vidasIniciais);
 
     int tesouroColetados = 0;
     int statusJogo = JOGANDO;
@@ -150,10 +99,17 @@ int main(){
     while(!WindowShouldClose()){
         // --- Lógica ---
         movePersonagem(&jogador, &mapa, &statusJogo, &tesouroColetados);
+        
+        // Mover inimigo independentemente (só se o jogo estiver ativo)
+        if (inimigo != NULL && statusJogo == JOGANDO) {
+            andaInimigo(&jogador, inimigo, &mapa);
+            // Verificar game over após movimento do inimigo
+            verificaGameOver(&jogador, &statusJogo);
+        }
 
         if (statusJogo == ENTRE_FASES) {
             if (IsKeyPressed(KEY_ENTER)) {
-                proximaFase(&mapa, &jogador, &statusJogo, &tesouroColetados, &fase);
+                proximaFase(&mapa, &jogador, &statusJogo, &tesouroColetados, &fase, &inimigo);
             }
         }
 
@@ -161,14 +117,17 @@ int main(){
         BeginDrawing();
             ClearBackground(DARKGRAY);
             desenhaMapa(mapa);
-            
+                        
             switch (statusJogo) {
                 case MENU:
-                    // TODO: Implementar menu
-                    break;
+                // TODO: Implementar menu
+                break;
                 case JOGANDO:
                     DrawText(TextFormat("Fase: %d", fase), 10, 10, 20, WHITE);
                     DrawText(TextFormat("Tesouros: %d/%d", tesouroColetados, mapa.totalTesouros), 10, 35, 20, WHITE);
+                    DrawText(TextFormat("Vidas: %d", jogador.vidas), 10, 60, 20, WHITE);
+                    desenhaInimigos(mapa, inimigo);
+                    desenhaJogadorComEfeito(jogador, mapa);
                     break;
                 case JOGO_COMPLETO:
                     DrawText("PARABENS! TODOS OS TESOUROS COLETADOS!", SCREEN_WIDTH / 2 - MeasureText("PARABENS! TODOS OS TESOUROS COLETADOS!", 20) / 2, 40, 20, GREEN);
@@ -177,12 +136,24 @@ int main(){
                 case ENTRE_FASES:
                     DrawText("Fase Completa! Aperte ENTER para continuar", SCREEN_WIDTH / 2 - MeasureText("Fase Completa! Preparando próxima fase...", 20) / 2, 40, 20, GREEN);
                     break;
+                case GAME_OVER:
+                    DrawText("GAME OVER!", SCREEN_WIDTH / 2 - MeasureText("GAME OVER!", 40) / 2, SCREEN_HEIGHT / 2 - 60, 40, RED);
+                    DrawText("Suas vidas acabaram!", SCREEN_WIDTH / 2 - MeasureText("Suas vidas acabaram!", 20) / 2, SCREEN_HEIGHT / 2 - 10, 20, WHITE);
+                    DrawText("Pressione ESC para sair", SCREEN_WIDTH / 2 - MeasureText("Pressione ESC para sair", 20) / 2, SCREEN_HEIGHT / 2 + 20, 20, YELLOW);
+                    break;
             }
             
         EndDrawing();
-    }    // --- Limpeza ---
+    }
+    
+    // --- Limpeza ---
     CloseWindow();
     liberaMapa(&mapa);
+    
+    // Liberar memória dos inimigos
+    if (inimigo != NULL) {
+        free(inimigo);
+    }
 
     return 0;
 }

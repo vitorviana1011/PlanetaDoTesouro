@@ -5,22 +5,29 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// Forward declaration para evitar dependência circular
+typedef struct {
+    int x;
+    int y;
+    float velocidade;
+} Inimigo;
+
 typedef struct {
     char **dados;
     int linhas;
     int colunas;
     int totalTesouros;
+    int totalInimigos;
 } Mapa;
 
 /**
- * @brief Lê as dimensões e quantidade de tesouros da primeira linha do arquivo
+ * @brief Lê as dimensões da primeira linha do arquivo
  * @param arq Ponteiro para o arquivo aberto
  * @param linhas Ponteiro para armazenar o número de linhas
  * @param colunas Ponteiro para armazenar o número de colunas
- * @param totalTesouros Ponteiro para armazenar a quantidade total de tesouros
  * @return 1 em caso de sucesso, 0 em caso de erro
  */
-int tamanhoMapa(FILE *arq, int *linhas, int *colunas, int *totalTesouros);
+int tamanhoMapa(FILE *arq, int *linhas, int *colunas);
 
 /**
  * @brief Verifica se um arquivo existe no sistema
@@ -39,7 +46,7 @@ void mostrarMapa(char **mapa, int linhas);
  * @brief Carrega o mapa do arquivo e o exibe na tela
  * @return Estrutura Mapa com dados, linhas e colunas
  */
-Mapa carregaMapa(int fase);
+Mapa carregaMapa(int fase, Inimigo **inimigos);
 
 /**
  * @brief Libera a memória alocada para o mapa

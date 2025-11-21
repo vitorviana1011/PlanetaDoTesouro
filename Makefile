@@ -9,7 +9,7 @@ endif
 
 # Configurações básicas
 TARGET = planetadotesouro
-SRCS = planetadotesouro.c manipulaArquivos.c
+SRCS = planetadotesouro.c manipulaArquivos.c logicaJogo.c inimigo.c
 OBJS = $(SRCS:.c=.o)
 CC = gcc
 CFLAGS = -g -Wall -Wextra -std=c99
@@ -74,7 +74,7 @@ run: $(TARGET)$(BINEXT)
 	@echo "Executando $(TARGET)..."
 	./$(TARGET)$(BINEXT)
 
-clean:
+clear:
 	$(RM) $(TARGET)$(BINEXT) $(OBJS)
 	@echo "Limpeza concluída"
 

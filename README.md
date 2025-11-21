@@ -28,7 +28,7 @@ Jogo de labirinto 2D em C usando Raylib. O jogador (`@`) navega pelo labirinto c
 | `@` | Jogador |
 | `#` | Parede |
 | `.` | Caminho livre |
-| `E` | Tesouro |
+| `T` | Tesouro |
 
 ## Instalação
 
@@ -49,7 +49,7 @@ sudo apt install libraylib-dev
 
 - **Execute**: `make run`
 - **Movimento**: Use as setas do teclado para navegar
-- **Objetivo**: Colete todos os tesouros (`E`) de cada fase
+- **Objetivo**: Colete todos os tesouros (`T`) de cada fase
 - **Interface**: 
   - `Fase: X` - Fase atual
   - `Tesouros: X/Y` - Progresso na fase
@@ -66,7 +66,7 @@ sudo apt install libraylib-dev
 5 5 2
 @####
 ....#
-#E#E#
+#T#T#
 #...#
 ###..
 ```
