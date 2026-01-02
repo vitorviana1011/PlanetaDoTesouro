@@ -102,10 +102,10 @@ int main(){
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Planeta do Tesouro");
     listarMapasDisponiveis();
 
-    int fase = 5;
+    int fase = 1;
     int vidasIniciais = 3;
 
-    Inimigo* inimigo;
+    Inimigo* inimigo = NULL;
 
     Mapa mapa = carregaMapa(fase, &inimigo);
 

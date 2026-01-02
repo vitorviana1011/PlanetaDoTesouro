@@ -4,16 +4,33 @@
 #include "includes/inimigo.h"
 
 Jogador encontrarJogador(Mapa mapa, int vidas) {
-    Jogador jogador = {0, 0, vidas, 0.0};
+    Jogador jogador = {-1, -1, vidas, 0.0}; // Inicializar com posições inválidas
+    
+    // Verificar se o mapa é válido
+    if (mapa.dados == NULL || mapa.linhas <= 0 || mapa.colunas <= 0) {
+        printf("ERRO: Mapa inválido ao procurar jogador\n");
+        return jogador;
+    }
+    
+    printf("Procurando jogador em mapa %dx%d...\n", mapa.linhas, mapa.colunas);
+    
     for (int i = 0; i < mapa.linhas; i++) {
+        if (mapa.dados[i] == NULL) {
+            printf("ERRO: Linha %d do mapa é nula!\n", i);
+            return jogador;
+        }
+        
         for (int j = 0; j < mapa.colunas; j++) {
             if (mapa.dados[i][j] == '@') {
                 jogador.y = i;
                 jogador.x = j;
+                printf("Jogador encontrado na posição (%d, %d)\n", jogador.x, jogador.y);
                 return jogador;
             }
         }
     }
+    
+    printf("AVISO: Jogador '@' não encontrado no mapa!\n");
     return jogador;
 }
 
@@ -26,24 +43,50 @@ bool confereTesouro(Mapa *mapa, int x, int y){
 }
 
 void proximaFase(Mapa *mapa, Jogador *jogador, int *statusJogo, int *tesouroColetados, int *fase, Inimigo **inimigo){
-    int novaFase = (*fase) + 1;
+    if (!mapa || !jogador || !statusJogo || !tesouroColetados || !fase || !inimigo) {
+        printf("ERRO: Parâmetros nulos em proximaFase!\n");
+        return;
+    }
     
-    // Liberar inimigos anteriores
+    int novaFase = (*fase) + 1;
+    printf("Tentando carregar fase %d...\n", novaFase);
+    
+    // Liberar inimigos anteriores com segurança
     if (*inimigo != NULL) {
+        printf("Liberando inimigos anteriores...\n");
         free(*inimigo);
         *inimigo = NULL;
     }
     
+    // Carregar novo mapa
     Mapa novoMapa = carregaMapa(novaFase, inimigo);
     
-    if (novoMapa.dados != NULL) {
-        liberaMapa(mapa);
+    // Verificar se o carregamento foi bem-sucedido
+    if (novoMapa.dados != NULL && novoMapa.linhas > 0 && novoMapa.colunas > 0) {
+        printf("Novo mapa carregado com sucesso, liberando mapa anterior...\n");
+        
+        // Liberar mapa anterior com segurança
+        if (mapa->dados != NULL) {
+            liberaMapa(mapa);
+        }
+        
+        // Atribuir novo mapa
         *mapa = novoMapa;
-        *jogador = encontrarJogador(*mapa, jogador->vidas);
-        *tesouroColetados = 0;
-        (*fase)++;
-        *statusJogo = JOGANDO;
+        
+        // Verificar se encontrou o jogador no novo mapa
+        Jogador novoJogador = encontrarJogador(*mapa, jogador->vidas);
+        if (novoJogador.x >= 0 && novoJogador.y >= 0) {
+            *jogador = novoJogador;
+            *tesouroColetados = 0;
+            (*fase)++;
+            *statusJogo = JOGANDO;
+            printf("Fase %d carregada com sucesso!\n", *fase);
+        } else {
+            printf("ERRO: Jogador não encontrado no mapa da fase %d\n", novaFase);
+            *statusJogo = GAME_OVER;
+        }
     } else {
+        printf("Fim do jogo - Fase %d não encontrada ou erro no carregamento\n", novaFase);
         *statusJogo = JOGO_COMPLETO;
     }
 }
@@ -139,53 +182,34 @@ void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroC
     mapa->dados[jogador->y][jogador->x] = '@';
 }
 
-// Versão O(n) otimizada - apenas UMA passada pelo mapa
+// Função O(1) usando a estrutura de portais - MUITO mais eficiente!
 char verificaPortalNaPosicao(Mapa *mapa, int x, int y) {
-    int contadores[10] = {0}; // Para '0'-'9'
-    char resultado = '.';
-    
-    // Uma única passada pelo mapa - O(n)
-    for (int i = 0; i < mapa->linhas; i++) {
-        for (int j = 0; j < mapa->colunas; j++) {
-            char tile = mapa->dados[i][j];
-            if (tile >= '1' && tile <= '9') {
-                int idx = tile - '0';
-                contadores[idx]++;
-                
-                // Se esta posição é a que estamos procurando
-                if (i == y && j == x) {
-                    resultado = tile;
-                }
-            }
+    // Verificar se a posição (x,y) corresponde a algum portal nos pares armazenados
+    for (int i = 0; i < mapa->totalPortais; i++) {
+        if ((mapa->portais[i].x1 == x && mapa->portais[i].y1 == y) ||
+            (mapa->portais[i].x2 == x && mapa->portais[i].y2 == y)) {
+            return mapa->portais[i].numero;
         }
     }
-    
-    // Verificar se o portal encontrado tem par (count >= 2)
-    if (resultado >= '1' && resultado <= '9') {
-        int idx = resultado - '0';
-        if (contadores[idx] >= 2) {
-            return resultado;
-        }
-    }
-    
-    return '.';
+    return '.'; // Não é um portal
 }
 
-// No mapa: '1' e '1' são um par, '2' e '2' são outro par
+// Função O(1) para teleporte usando pares pré-calculados
 void verificaPortalNumerado(Jogador *jogador, Mapa *mapa, int y, int x) {
-    char tile = mapa->dados[y][x];
-    
-    for (int i = 0; i < mapa->linhas; i++) {
-        for (int j = 0; j < mapa->colunas; j++) {
-            if (mapa->dados[i][j] == tile && (i != y || j != x)) {
-
-                mapa->dados[jogador->y][jogador->x] = '.';
-                
-                jogador->y = i;
-                jogador->x = j;
-                
-                return;
-            }
+    // Buscar o par do portal na estrutura - O(1) amortizado
+    for (int i = 0; i < mapa->totalPortais; i++) {
+        if (mapa->portais[i].x1 == x && mapa->portais[i].y1 == y) {
+            // Teleportar para a segunda posição
+            mapa->dados[jogador->y][jogador->x] = '.';
+            jogador->x = mapa->portais[i].x2;
+            jogador->y = mapa->portais[i].y2;
+            return;
+        } else if (mapa->portais[i].x2 == x && mapa->portais[i].y2 == y) {
+            // Teleportar para a primeira posição
+            mapa->dados[jogador->y][jogador->x] = '.';
+            jogador->x = mapa->portais[i].x1;
+            jogador->y = mapa->portais[i].y1;
+            return;
         }
     }
 }

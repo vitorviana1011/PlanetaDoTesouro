@@ -9,6 +9,13 @@
 #define MAX_LINHAS 30
 #define MAX_COLUNAS 30
 
+// Estrutura para pares de portais
+typedef struct {
+    int x1, y1; // Coordenadas do primeiro portal
+    int x2, y2; // Coordenadas do segundo portal
+    char numero; // Número do portal ('1', '2', etc)
+} ParPortal;
+
 // Forward declaration para evitar dependência circular
 typedef struct {
     int x;
@@ -23,6 +30,8 @@ typedef struct {
     int colunas;
     int totalTesouros;
     int totalInimigos;
+    ParPortal portais[9]; // Máximo 9 pares de portais ('1' a '9')
+    int totalPortais;     // Quantidade de pares válidos
 } Mapa;
 
 /**
