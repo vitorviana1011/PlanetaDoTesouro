@@ -6,7 +6,7 @@
 #include "manipulaArquivos.h"
 
 // Estados do jogo
-enum {MENU = 0, JOGANDO, JOGO_COMPLETO, ENTRE_FASES, GAME_OVER};
+enum {MENU = 0, JOGANDO, JOGO_COMPLETO, ENTRE_FASES, GAME_OVER, TELA_RESULTADOS, TELA_INPUT_NOME, TELA_RANKING};
 
 // Estrutura do jogador
 typedef struct {
@@ -40,8 +40,9 @@ bool confereTesouro(Mapa *mapa, int x, int y);
  * @param tesouroColetados Ponteiro para contador de tesouros
  * @param fase Ponteiro para número da fase
  * @param inimigo Ponteiro duplo para array de inimigos
+ * @param cronometro Ponteiro para o cronômetro de speedrun
  */
-void proximaFase(Mapa *mapa, Jogador *jogador, int *statusJogo, int *tesouroColetados, int *fase, Inimigo **inimigo);
+void proximaFase(Mapa *mapa, Jogador *jogador, int *statusJogo, int *tesouroColetados, int *fase, Inimigo **inimigo, Cronometro *cronometro);
 
 /**
  * @brief Verifica se o jogador perdeu todas as vidas
@@ -49,6 +50,24 @@ void proximaFase(Mapa *mapa, Jogador *jogador, int *statusJogo, int *tesouroCole
  * @param statusJogo Ponteiro para o status do jogo
  */
 void verificaGameOver(Jogador *jogador, int *statusJogo);
+
+/**
+ * @brief Desenha a tela de resultados do speedrun
+ * @param cronometro Cronômetro com os dados do jogo
+ */
+void desenhaTelaResultados(Cronometro *cronometro);
+
+/**
+ * @brief Desenha a tela de input do nome do jogador
+ * @param nomeJogador String para armazenar o nome
+ * @param cronometro Cronômetro com os dados do jogo
+ */
+void desenhaTelaInputNome(char *nomeJogador, Cronometro *cronometro);
+
+/**
+ * @brief Desenha o ranking de tempos
+ */
+void desenhaRanking(void);
 
 /**
  * @brief Verifica colisão entre jogador e inimigos

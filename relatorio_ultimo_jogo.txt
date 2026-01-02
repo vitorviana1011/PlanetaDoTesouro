@@ -1,0 +1,24 @@
+RELATÓRIO DE JOGO - PLANETA DO TESOURO
+═══════════════════════════════════════════════════
+
+Data/Hora: 02/01/2026 às 15:53:07
+
+RESUMO GERAL:
+   Tempo Total: 68.76 segundos
+   Fases Completas: 6
+
+DETALHES POR FASE:
+   Fase 1: 3.48 segundos
+   Fase 2: 5.15 segundos
+   Fase 3: 15.53 segundos
+   Fase 4: 1.90 segundos
+   Fase 5: 17.52 segundos
+   Fase 6: 25.18 segundos
+
+ESTATÍSTICAS:
+   Tempo médio por fase: 11.46 segundos
+   Melhor fase: Fase 4 (1.90 segundos)
+   Pior fase: Fase 6 (25.18 segundos)
+
+Obrigado por jogar!
+═══════════════════════════════════════════════════

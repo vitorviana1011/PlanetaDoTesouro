@@ -4,10 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
+#include <string.h>
 
 // Limites do mapa
 #define MAX_LINHAS 30
 #define MAX_COLUNAS 30
+#define MAX_FASES 10
+#define MAX_RECORDES 100
+#define MAX_NOME 50
 
 // Estrutura para pares de portais
 typedef struct {
@@ -15,6 +20,26 @@ typedef struct {
     int x2, y2; // Coordenadas do segundo portal
     char numero; // Número do portal ('1', '2', etc)
 } ParPortal;
+
+// Estrutura para cronômetro de speedrun
+typedef struct {
+    double inicioFase;
+    double fimFase;
+    double tempoFase;
+    double inicioJogo;
+    double tempoTotal;
+    double temposPorFase[MAX_FASES];
+    int faseAtual;
+} Cronometro;
+
+// Estrutura para recordes
+typedef struct {
+    char nomeJogador[MAX_NOME];
+    double tempoTotal;
+    double temposPorFase[MAX_FASES];
+    char dataHora[50];
+    int fasesCompletas;
+} Recorde;
 
 // Forward declaration para evitar dependência circular
 typedef struct {
@@ -72,5 +97,49 @@ void liberaMapa(Mapa *mapa);
  * @brief Lista mapas disponíveis no diretório mapas/
  */
 void listarMapasDisponiveis(void);
+
+// Funções de Speedrun
+/**
+ * @brief Inicializa o cronômetro de speedrun
+ * @param cronometro Ponteiro para a estrutura do cronômetro
+ */
+void iniciarCronometro(Cronometro *cronometro);
+
+/**
+ * @brief Inicia o cronômetro de uma nova fase
+ * @param cronometro Ponteiro para a estrutura do cronômetro
+ * @param numeroFase Número da fase que está iniciando
+ */
+void iniciarFase(Cronometro *cronometro, int numeroFase);
+
+/**
+ * @brief Finaliza o cronômetro da fase atual
+ * @param cronometro Ponteiro para a estrutura do cronômetro
+ */
+void finalizarFase(Cronometro *cronometro);
+
+/**
+ * @brief Finaliza o jogo e calcula tempo total
+ * @param cronometro Ponteiro para a estrutura do cronômetro
+ */
+void finalizarJogo(Cronometro *cronometro);
+
+/**
+ * @brief Solicita nome do jogador e salva o recorde
+ * @param cronometro Cronômetro com os tempos do jogo
+ * @param nomeJogador Nome personalizado do jogador
+ */
+void salvarRecorde(Cronometro *cronometro, const char *nomeJogador);
+
+/**
+ * @brief Carrega e exibe o ranking de recordes
+ */
+void exibirRanking(void);
+
+/**
+ * @brief Gera relatório completo de speedrun
+ * @param cronometro Cronômetro com os tempos
+ */
+void gerarRelatorioSpeedrun(Cronometro *cronometro);
 
 #endif // MANIPULA_ARQUIVOS_H
