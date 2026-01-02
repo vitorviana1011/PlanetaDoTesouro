@@ -13,100 +13,18 @@
 #include "includes/manipulaArquivos.h"
 #include "includes/logicaJogo.h"
 #include "includes/inimigo.h"
+#include "includes/desenhos.h"
 #include <string.h>
-
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 1000
 
 // Variável global para o nome do jogador
 static char nomeJogador[MAX_NOME] = "";
-
-void desenhaMapa(Mapa mapa){
-    int tileSize = 32;
-    int mapaLargura = mapa.colunas * tileSize;
-    int mapaAltura = mapa.linhas * tileSize;
-    
-    int offsetX = (SCREEN_WIDTH - mapaLargura) / 2;
-    int offsetY = (SCREEN_HEIGHT - mapaAltura) / 2;
-    
-    for (int i = 0; i < mapa.linhas; i++) {
-        for (int j = 0; j < mapa.colunas; j++) {
-            char tile = mapa.dados[i][j];
-            Color color;
-            switch (tile) {
-                case '#': color = BLACK; break; // Parede
-                case '.': color = GRAY; break; // Caminho
-                case '@': color = BLUE; break; // Jogador
-                case 'T': color = YELLOW; break; // Tesouro
-                case 'I': color = GRAY; break;
-                case 'C': color = GREEN; break; // Cura
-                case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-                    color = PURPLE; break; // Portal numerado
-                default: color = LIGHTGRAY; break; // Espaço vazio
-            }
-            DrawRectangle(offsetX + j * tileSize, offsetY + i * tileSize, tileSize, tileSize, color);
-        }
-    }
-}
-
-void desenhaPortais(Mapa mapa, Jogador jogador) {
-    int tileSize = 32;
-    int mapaLargura = mapa.colunas * tileSize;
-    int mapaAltura = mapa.linhas * tileSize;
-    
-    int offsetX = (SCREEN_WIDTH - mapaLargura) / 2;
-    int offsetY = (SCREEN_HEIGHT - mapaAltura) / 2;
-    
-    // Desenhar portais onde o jogador está (se houver)
-    char portal = verificaPortalNaPosicao(&mapa, jogador.x, jogador.y);
-    if (portal >= '1' && portal <= '9') {
-        int x = offsetX + jogador.x * tileSize;
-        int y = offsetY + jogador.y * tileSize;
-        DrawRectangle(x, y, tileSize, tileSize, BLUE);
-    }
-}
-
-void desenhaInimigos(Mapa mapa, Inimigo *inimigos) {
-    if (inimigos == NULL) return;
-    
-    int tileSize = 32;
-    int mapaLargura = mapa.colunas * tileSize;
-    int mapaAltura = mapa.linhas * tileSize;
-    
-    int offsetX = (SCREEN_WIDTH - mapaLargura) / 2;
-    int offsetY = (SCREEN_HEIGHT - mapaAltura) / 2;
-    
-    // Desenhar todos os inimigos na sua posição lógica
-    for (int i = 0; i < mapa.totalInimigos; i++) {
-        int x = offsetX + inimigos[i].x * tileSize;
-        int y = offsetY + inimigos[i].y * tileSize;
-        DrawRectangle(x, y, tileSize, tileSize, RED);
-    }
-}
-
-void desenhaJogadorComEfeito(Jogador jogador, Mapa mapa){
-    int tileSize = 32;
-    int x = jogador.x * tileSize + (SCREEN_WIDTH - (tileSize *  mapa.colunas)) / 2;
-    int y = jogador.y * tileSize + (SCREEN_HEIGHT - (tileSize *  mapa.linhas)) / 2;
-    
-    // Se o jogador está invencível, fazer ele piscar
-    double tempoAtual = GetTime();
-    if (tempoAtual < jogador.tempoInvencibilidade) {
-        // Piscar a cada 0.2 segundos
-        if (((int)(tempoAtual * 5)) % 2 == 0) {
-            DrawRectangle(x, y, tileSize, tileSize, SKYBLUE); // Cor alternativa
-        } else {
-            DrawRectangle(x, y, tileSize, tileSize, BLUE); // Cor normal
-        }
-    }
-}
 
 int main(){
     // --- Inicialização ---
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Planeta do Tesouro");
     listarMapasDisponiveis();
 
-    int fase = 6;
+    int fase = 1;
     int vidasIniciais = 3;
 
     Inimigo* inimigo = NULL;
@@ -199,39 +117,22 @@ int main(){
                         
             switch (statusJogo) {
                 case MENU:
-                // TODO: Implementar menu
-                break;
+                    // TODO: Implementar menu
+                    break;
                 case JOGANDO:
-                    // Info principal do jogo
-                    DrawText(TextFormat("Fase: %d", fase), 10, 10, 20, WHITE);
-                    DrawText(TextFormat("Tesouros: %d/%d", tesouroColetados, mapa.totalTesouros), 10, 35, 20, WHITE);
-                    DrawText(TextFormat("Vidas: %d", jogador.vidas), 10, 60, 20, WHITE);
-                    
-                    // Cronômetro discreto no canto
-                    double tempoAtual = GetTime();
-                    double tempoFaseAtual = tempoAtual - cronometro.inicioFase;
-                    double tempoTotalAtual = tempoAtual - cronometro.inicioJogo;
-                    
-                    DrawText(TextFormat("Tempo: %.1fs", tempoFaseAtual), SCREEN_WIDTH - 150, 10, 18, LIGHTGRAY);
-                    DrawText(TextFormat("Total: %.1fs", tempoTotalAtual), SCREEN_WIDTH - 150, 30, 16, DARKGRAY);
-                    
+                    desenhaHUDJogo(fase, tesouroColetados, mapa, jogador, &cronometro);
                     desenhaPortais(mapa, jogador); // Desenhar portal embaixo do jogador primeiro
                     desenhaInimigos(mapa, inimigo);
                     desenhaJogadorComEfeito(jogador, mapa); // Jogador por último, em cima de tudo
                     break;
                 case JOGO_COMPLETO:
-                    DrawText("PARABÉNS! JOGO COMPLETO!", SCREEN_WIDTH / 2 - MeasureText("PARABÉNS! JOGO COMPLETO!", 30) / 2, 40, 30, GREEN);
-                    DrawText(TextFormat("Tempo Final: %.2f segundos", cronometro.tempoTotal), SCREEN_WIDTH / 2 - MeasureText(TextFormat("Tempo Final: %.2f segundos", cronometro.tempoTotal), 25) / 2, 80, 25, YELLOW);
-                    DrawText("Relatório de tempo salvo!", SCREEN_WIDTH / 2 - MeasureText("Relatório de tempo salvo!", 20) / 2, 120, 20, WHITE);
-                    DrawText("Pressione ESC para sair", SCREEN_WIDTH / 2 - MeasureText("Pressione ESC para sair", 20) / 2, 150, 20, LIGHTGRAY);
+                    desenhaTelaJogoCompleto(cronometro);
                     break;
                 case ENTRE_FASES:
-                    DrawText("Fase Completa! Aperte ENTER para continuar", SCREEN_WIDTH / 2 - MeasureText("Fase Completa! Preparando próxima fase...", 20) / 2, 40, 20, GREEN);
+                    desenhaTelaEntreFases();
                     break;
                 case GAME_OVER:
-                    DrawText("GAME OVER!", SCREEN_WIDTH / 2 - MeasureText("GAME OVER!", 40) / 2, SCREEN_HEIGHT / 2 - 60, 40, RED);
-                    DrawText("Suas vidas acabaram!", SCREEN_WIDTH / 2 - MeasureText("Suas vidas acabaram!", 20) / 2, SCREEN_HEIGHT / 2 - 10, 20, WHITE);
-                    DrawText("Pressione ESC para sair", SCREEN_WIDTH / 2 - MeasureText("Pressione ESC para sair", 20) / 2, SCREEN_HEIGHT / 2 + 20, 20, YELLOW);
+                    desenhaTelaGameOver();
                     break;
                 case TELA_RESULTADOS:
                     desenhaTelaResultados(&cronometro);

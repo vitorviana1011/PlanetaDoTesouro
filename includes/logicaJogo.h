@@ -52,24 +52,6 @@ void proximaFase(Mapa *mapa, Jogador *jogador, int *statusJogo, int *tesouroCole
 void verificaGameOver(Jogador *jogador, int *statusJogo);
 
 /**
- * @brief Desenha a tela de resultados do speedrun
- * @param cronometro Cronômetro com os dados do jogo
- */
-void desenhaTelaResultados(Cronometro *cronometro);
-
-/**
- * @brief Desenha a tela de input do nome do jogador
- * @param nomeJogador String para armazenar o nome
- * @param cronometro Cronômetro com os dados do jogo
- */
-void desenhaTelaInputNome(char *nomeJogador, Cronometro *cronometro);
-
-/**
- * @brief Desenha o ranking de tempos
- */
-void desenhaRanking(void);
-
-/**
  * @brief Verifica colisão entre jogador e inimigos
  * @param jogador Ponteiro para o jogador
  * @param inimigos Array de inimigos
