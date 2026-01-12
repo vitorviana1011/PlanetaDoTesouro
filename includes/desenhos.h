@@ -19,6 +19,21 @@
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 
+// Estrutura para representar um botão do menu
+typedef struct {
+    Rectangle bounds;    // Área do botão (posição e tamanho)
+    const char* texto;   // Texto exibido no botão
+    bool hover;          // Se o mouse está sobre o botão
+} BotaoMenu;
+
+// Enumeração para ações dos botões do menu
+typedef enum {
+    ACAO_NENHUMA = 0,
+    ACAO_INICIAR,
+    ACAO_RANKING,
+    ACAO_TUTORIAL
+} AcaoBotaoMenu;
+
 // ===== FUNÇÕES DE DESENHO DO JOGO =====
 
 /**
@@ -95,5 +110,39 @@ void desenhaTelaEntreFases(void);
  * @brief Desenha a tela de game over
  */
 void desenhaTelaGameOver(void);
+
+/**
+ * @brief Desenha a tela do menu principal
+ */
+void desenhaTelaMenu(void);
+
+/**
+ * @brief Desenha um botão com estilo madeira e borda dourada
+ * @param botao Estrutura do botão a ser desenhado
+ */
+void desenhaBotaoMenu(BotaoMenu* botao);
+
+/**
+ * @brief Atualiza o estado de hover de um botão baseado na posição do mouse
+ * @param botao Ponteiro para o botão a ser atualizado
+ */
+void atualizaHoverBotao(BotaoMenu* botao);
+
+/**
+ * @brief Verifica se algum botão do menu foi clicado e retorna a ação correspondente
+ * @return AcaoBotaoMenu A ação do botão clicado ou ACAO_NENHUMA se nenhum foi clicado
+ */
+AcaoBotaoMenu verificaCliqueBotoesMenu(void);
+
+/**
+ * @brief Carrega recursos gráficos (texturas) usados pelas telas
+ * Deve ser chamado após InitWindow()
+ */
+void carregarRecursos(void);
+
+/**
+ * @brief Libera recursos gráficos carregados por carregarRecursos()
+ */
+void liberarRecursos(void);
 
 #endif // DESENHOS_H

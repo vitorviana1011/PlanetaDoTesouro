@@ -22,6 +22,8 @@ static char nomeJogador[MAX_NOME] = "";
 int main(){
     // --- Inicialização ---
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Planeta do Tesouro");
+    // Carregar recursos gráficos (texturas)
+    carregarRecursos();
     listarMapasDisponiveis();
 
     int fase = 1;
@@ -36,11 +38,8 @@ int main(){
     Mapa mapa = carregaMapa(fase, &inimigo);
     Jogador jogador = encontrarJogador(mapa, vidasIniciais);
 
-    // Iniciar cronômetro da primeira fase
-    iniciarFase(&cronometro, fase);
-
     int tesouroColetados = 0;
-    int statusJogo = JOGANDO;
+    int statusJogo = MENU;
 
     SetTargetFPS(60);
 
@@ -117,7 +116,35 @@ int main(){
                         
             switch (statusJogo) {
                 case MENU:
-                    // TODO: Implementar menu
+                    desenhaTelaMenu();
+                    
+                    // Verificar cliques nos botões
+                    AcaoBotaoMenu acao = verificaCliqueBotoesMenu();
+                    switch (acao) {
+                        case ACAO_INICIAR:
+                            statusJogo = JOGANDO;
+                            iniciarFase(&cronometro, fase);
+                            break;
+                        case ACAO_RANKING:
+                            statusJogo = TELA_RANKING;
+                            break;
+                        case ACAO_TUTORIAL:
+                            // TODO: Implementar tela de tutorial
+                            break;
+                        case ACAO_NENHUMA:
+                        default:
+                            break;
+                    }
+                    
+                    // Manter compatibilidade com teclado
+                    switch (GetKeyPressed()) {
+                        case KEY_ENTER:
+                            statusJogo = JOGANDO;
+                            break;
+                        case KEY_ESCAPE:
+                            CloseWindow();
+                            break;
+                    }
                     break;
                 case JOGANDO:
                     desenhaHUDJogo(fase, tesouroColetados, mapa, jogador, &cronometro);
@@ -149,6 +176,8 @@ int main(){
     }
     
     // --- Limpeza ---
+    // Liberar texturas carregadas
+    liberarRecursos();
     CloseWindow();
     liberaMapa(&mapa);
     

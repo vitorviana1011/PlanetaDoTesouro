@@ -6,7 +6,7 @@
 #include "manipulaArquivos.h"
 
 // Estados do jogo
-enum {MENU = 0, JOGANDO, JOGO_COMPLETO, ENTRE_FASES, GAME_OVER, TELA_RESULTADOS, TELA_INPUT_NOME, TELA_RANKING};
+enum {MENU = 0, JOGANDO, JOGO_COMPLETO, ENTRE_FASES, GAME_OVER, TELA_RESULTADOS, TELA_INPUT_NOME, TELA_RANKING, TUTORIAL};
 
 // Estrutura do jogador
 typedef struct {
