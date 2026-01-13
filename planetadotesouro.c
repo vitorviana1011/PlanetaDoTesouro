@@ -129,7 +129,7 @@ int main(){
                             statusJogo = TELA_RANKING;
                             break;
                         case ACAO_TUTORIAL:
-                            // TODO: Implementar tela de tutorial
+                            statusJogo = TUTORIAL;
                             break;
                         case ACAO_NENHUMA:
                         default:
@@ -166,9 +166,32 @@ int main(){
                     break;
                 case TELA_RANKING:
                     desenhaRanking();
+                    
+                    // Verificar clique no botão VOLTAR
+                    if (verificaCliqueBotaoRanking()) {
+                        statusJogo = MENU;
+                    }
+                    
+                    // Voltar ao menu com ESC (manter compatibilidade)
+                    if (IsKeyPressed(KEY_ESCAPE)) {
+                        statusJogo = MENU;
+                    }
                     break;
                 case TELA_INPUT_NOME:
                     desenhaTelaInputNome(nomeJogador, &cronometro);
+                    break;
+                case TUTORIAL:
+                    desenhaTelaTutorial();
+                    
+                    // Verificar clique no botão VOLTAR
+                    if (verificaCliqueBotaoTutorial()) {
+                        statusJogo = MENU;
+                    }
+                    
+                    // Voltar ao menu com ESC (manter compatibilidade)
+                    if (IsKeyPressed(KEY_ESCAPE)) {
+                        statusJogo = MENU;
+                    }
                     break;
             }
             

@@ -189,86 +189,208 @@ void desenhaTelaInputNome(char *nomeJogador, Cronometro *cronometro) {
 }
 
 void desenhaRanking(void) {
-    ClearBackground(BLACK);
+    float tempo = GetTime();
     
+    // Background animado deslizando infinitamente na diagonal (mesmo do menu)
+    if (recursos_carregados && texBackground.id) {
+        // Velocidade do movimento diagonal (em pixels por segundo)
+        float velocidade = 30.0f;
+        
+        // Calcular offset baseado no tempo para movimento contínuo
+        float offsetX = fmod(tempo * velocidade, texBackground.width);
+        float offsetY = fmod(tempo * velocidade * 0.7f, texBackground.height);
+        
+        // Desenhar múltiplas cópias do background para preencher a tela
+        for (int x = -1; x <= 2; x++) {
+            for (int y = -1; y <= 2; y++) {
+                Rectangle src = { 0.0f, 0.0f, (float)texBackground.width, (float)texBackground.height };
+                Rectangle dest = { 
+                    x * texBackground.width - offsetX, 
+                    y * texBackground.height - offsetY, 
+                    (float)texBackground.width, 
+                    (float)texBackground.height 
+                };
+                Vector2 origin = { 0.0f, 0.0f };
+                DrawTexturePro(texBackground, src, dest, origin, 0.0f, WHITE);
+            }
+        }
+    } else {
+        ClearBackground(DARKBLUE);
+    }
+    
+    // Título com movimento flutuante
+    float flutuacao = sin(tempo * 1.5f) * 5.0f;
+    DrawText("🏆 RANKING 🏆", SCREEN_WIDTH / 2 - MeasureText("🏆 RANKING 🏆", 30) / 2, 40 + flutuacao, 30, GOLD);
+
+    // Retângulo principal com estilo madeira (centralizado)
+    Color corMadeira = (Color){139, 69, 19, 255};
+    Color corBorda = (Color){255, 215, 0, 255};
+    
+    // Dimensões centralizadas do retângulo
+    float larguraRetangulo = 800.0f;
+    float alturaRetangulo = 500.0f;
+    float centroX = SCREEN_WIDTH / 2.0f - larguraRetangulo / 2.0f;
+    float centroY = SCREEN_HEIGHT / 2.0f - alturaRetangulo / 2.0f + 30.0f; // +30 para ajustar com o título
+    
+    Rectangle retanguloRanking = {centroX, centroY, larguraRetangulo, alturaRetangulo};
+    
+    // Sombra do retângulo
+    Rectangle sombra = {retanguloRanking.x + 5, retanguloRanking.y + 5, retanguloRanking.width, retanguloRanking.height};
+    DrawRectangleRec(sombra, (Color){0, 0, 0, 100});
+    
+    // Fundo madeira
+    DrawRectangleRec(retanguloRanking, corMadeira);
+    
+    // Borda dourada
+    DrawRectangleLinesEx(retanguloRanking, 4.0f, corBorda);
+    
+    // Carregar dados do ranking
     FILE *arquivo = fopen("ranking.bin", "rb");
     if (arquivo == NULL) {
-        DrawText("🏆 RANKING 🏆", SCREEN_WIDTH / 2 - MeasureText("🏆 RANKING 🏆", 40) / 2, 200, 40, GOLD);
-        DrawText("Nenhum tempo registrado ainda.", SCREEN_WIDTH / 2 - MeasureText("Nenhum tempo registrado ainda.", 25) / 2, 300, 25, WHITE);
-        DrawText("Pressione ESC para sair", SCREEN_WIDTH / 2 - MeasureText("Pressione ESC para sair", 20) / 2, SCREEN_HEIGHT - 100, 20, YELLOW);
-        return;
-    }
-    
-    Recorde recordes[MAX_RECORDES];
-    int totalRecordes = 0;
-    
-    while (fread(&recordes[totalRecordes], sizeof(Recorde), 1, arquivo) == 1 && 
-           totalRecordes < MAX_RECORDES) {
-        totalRecordes++;
-    }
-    fclose(arquivo);
-    
-    for (int i = 0; i < totalRecordes - 1; i++) {
-        for (int j = 0; j < totalRecordes - i - 1; j++) {
-            if (recordes[j].tempoTotal > recordes[j + 1].tempoTotal) {
-                Recorde temp = recordes[j];
-                recordes[j] = recordes[j + 1];
-                recordes[j + 1] = temp;
+        // Caso não haja dados
+        int yPos = (int)(retanguloRanking.y + retanguloRanking.height / 2 - 40);
+        
+        const char* mensagem = "Nenhum tempo registrado ainda.";
+        int larguraTexto = MeasureText(mensagem, 24);
+        int textoX = (int)(retanguloRanking.x + (retanguloRanking.width - larguraTexto) / 2);
+        
+        DrawText(mensagem, textoX, yPos, 24, WHITE);
+        
+        const char* instrucao = "Complete o jogo para aparecer no ranking!";
+        larguraTexto = MeasureText(instrucao, 20);
+        textoX = (int)(retanguloRanking.x + (retanguloRanking.width - larguraTexto) / 2);
+        
+        DrawText(instrucao, textoX, yPos + 40, 20, YELLOW);
+    } else {
+        // Carregar e ordenar recordes
+        Recorde recordes[MAX_RECORDES];
+        int totalRecordes = 0;
+        
+        while (fread(&recordes[totalRecordes], sizeof(Recorde), 1, arquivo) == 1 && 
+               totalRecordes < MAX_RECORDES) {
+            totalRecordes++;
+        }
+        fclose(arquivo);
+        
+        // Ordenar por tempo
+        for (int i = 0; i < totalRecordes - 1; i++) {
+            for (int j = 0; j < totalRecordes - i - 1; j++) {
+                if (recordes[j].tempoTotal > recordes[j + 1].tempoTotal) {
+                    Recorde temp = recordes[j];
+                    recordes[j] = recordes[j + 1];
+                    recordes[j + 1] = temp;
+                }
             }
+        }
+        
+        // Cabeçalho da tabela
+        int inicioTabelaY = (int)(retanguloRanking.y + 30);
+        int margemEsquerda = (int)(retanguloRanking.x + 30);
+        
+        DrawText("Pos", margemEsquerda, inicioTabelaY, 20, YELLOW);
+        DrawText("Nome", margemEsquerda + 80, inicioTabelaY, 20, YELLOW);
+        DrawText("Tempo", margemEsquerda + 280, inicioTabelaY, 20, YELLOW);
+        DrawText("Fases", margemEsquerda + 400, inicioTabelaY, 20, YELLOW);
+        DrawText("Data", margemEsquerda + 500, inicioTabelaY, 20, YELLOW);
+        
+        // Linha divisória
+        DrawLine((int)(retanguloRanking.x + 20), inicioTabelaY + 25, 
+                 (int)(retanguloRanking.x + retanguloRanking.width - 20), inicioTabelaY + 25, GOLD);
+        
+        // Exibir recordes (máximo 12 para caber na tela)
+        int yPos = inicioTabelaY + 40;
+        int maxRecordes = totalRecordes < 12 ? totalRecordes : 12;
+        
+        for (int i = 0; i < maxRecordes; i++) {
+            Color cor = WHITE;
+            if (i == 0) cor = GOLD;        // 1º lugar
+            else if (i == 1) cor = LIGHTGRAY; // 2º lugar
+            else if (i == 2) cor = ORANGE;    // 3º lugar
+            
+            char posStr[10];
+            snprintf(posStr, sizeof(posStr), "%d°", i + 1);
+            DrawText(posStr, margemEsquerda, yPos, 18, cor);
+            
+            // Nome (limitado a 15 caracteres)
+            char nomeCompleto[MAX_NOME];
+            strncpy(nomeCompleto, recordes[i].nomeJogador, sizeof(nomeCompleto) - 1);
+            nomeCompleto[sizeof(nomeCompleto) - 1] = '\0';
+            if (strlen(nomeCompleto) > 15) {
+                nomeCompleto[12] = '.';
+                nomeCompleto[13] = '.';
+                nomeCompleto[14] = '.';
+                nomeCompleto[15] = '\0';
+            }
+            DrawText(nomeCompleto, margemEsquerda + 80, yPos, 18, cor);
+            
+            char tempoStr[20];
+            snprintf(tempoStr, sizeof(tempoStr), "%.2fs", recordes[i].tempoTotal);
+            DrawText(tempoStr, margemEsquerda + 280, yPos, 18, cor);
+            
+            char fasesStr[10];
+            snprintf(fasesStr, sizeof(fasesStr), "%d", recordes[i].fasesCompletas);
+            DrawText(fasesStr, margemEsquerda + 420, yPos, 18, cor);
+            
+            char dataStr[20];
+            strncpy(dataStr, recordes[i].dataHora, 10);
+            dataStr[10] = '\0';
+            DrawText(dataStr, margemEsquerda + 500, yPos, 16, cor);
+            
+            yPos += 30;
+        }
+        
+        // Destacar melhor tempo se existir
+        if (totalRecordes > 0) {
+            int yDestaque = (int)(retanguloRanking.y + retanguloRanking.height - 80);
+            DrawText("MELHOR TEMPO:", margemEsquerda, yDestaque, 22, GOLD);
+            
+            char detalhes[200];
+            snprintf(detalhes, sizeof(detalhes), "%s - %.2fs (%d fases)", 
+                    recordes[0].nomeJogador, recordes[0].tempoTotal, recordes[0].fasesCompletas);
+            DrawText(detalhes, margemEsquerda, yDestaque + 30, 20, WHITE);
         }
     }
     
-    DrawText("🏆 RANKING DE TEMPOS 🏆", SCREEN_WIDTH / 2 - MeasureText("🏆 RANKING DE TEMPOS 🏆", 35) / 2, 50, 35, GOLD);
+    // Botão VOLTAR na parte inferior
+    float larguraBotao = 200.0f;
+    float alturaBotao = 50.0f;
+    float centroXBotao = SCREEN_WIDTH / 2.0f - larguraBotao / 2.0f;
+    float posYBotao = SCREEN_HEIGHT - 100.0f;
     
-    DrawText("Pos", 80, 120, 20, LIGHTGRAY);
-    DrawText("Nome", 150, 120, 20, LIGHTGRAY);
-    DrawText("Tempo", 400, 120, 20, LIGHTGRAY);
-    DrawText("Fases", 550, 120, 20, LIGHTGRAY);
-    DrawText("Data", 650, 120, 20, LIGHTGRAY);
+    // Verificar hover do mouse no botão
+    Vector2 mousePosicao = GetMousePosition();
+    Rectangle botaoVoltar = {centroXBotao, posYBotao, larguraBotao, alturaBotao};
+    bool hoverBotao = CheckCollisionPointRec(mousePosicao, botaoVoltar);
     
-    DrawLine(50, 145, SCREEN_WIDTH - 50, 145, LIGHTGRAY);
+    // Cores do botão (mesmo estilo dos botões do menu)
+    Color corMadeiraBotao = (Color){139, 69, 19, 255};
+    Color corBordaBotao = (Color){255, 215, 0, 255};
+    Color corTextoBotao = hoverBotao ? (Color){255, 215, 0, 255} : WHITE;
     
-    int yPos = 160;
-    for (int i = 0; i < totalRecordes && i < 10 && yPos < SCREEN_HEIGHT - 150; i++) {
-        Color cor = WHITE;
-        if (i == 0) cor = GOLD;
-        else if (i == 1) cor = LIGHTGRAY;
-        else if (i == 2) cor = ORANGE;
-        
-        char posStr[10];
-        snprintf(posStr, sizeof(posStr), "%d°", i + 1);
-        DrawText(posStr, 80, yPos, 20, cor);
-        
-        DrawText(recordes[i].nomeJogador, 150, yPos, 20, cor);
-        
-        char tempoStr[20];
-        snprintf(tempoStr, sizeof(tempoStr), "%.2fs", recordes[i].tempoTotal);
-        DrawText(tempoStr, 400, yPos, 20, cor);
-        
-        char fasesStr[10];
-        snprintf(fasesStr, sizeof(fasesStr), "%d", recordes[i].fasesCompletas);
-        DrawText(fasesStr, 570, yPos, 20, cor);
-        
-        char dataStr[20];
-        strncpy(dataStr, recordes[i].dataHora, 10);
-        dataStr[10] = '\0';
-        DrawText(dataStr, 650, yPos, 18, cor);
-        
-        yPos += 35;
+    // Efeito hover - botão sobe um pouco
+    float offsetYBotao = hoverBotao ? -3.0f : 0.0f;
+    Rectangle botaoRect = {centroXBotao, posYBotao + offsetYBotao, larguraBotao, alturaBotao};
+    
+    // Sombra do botão (apenas quando não está em hover)
+    if (!hoverBotao) {
+        Rectangle sombraBotao = {botaoRect.x + 3, botaoRect.y + 3, botaoRect.width, botaoRect.height};
+        DrawRectangleRec(sombraBotao, (Color){0, 0, 0, 100});
     }
     
-    DrawLine(50, yPos + 10, SCREEN_WIDTH - 50, yPos + 10, LIGHTGRAY);
+    // Fundo do botão (madeira)
+    DrawRectangleRec(botaoRect, corMadeiraBotao);
     
-    if (totalRecordes > 0) {
-        DrawText("🥇 MELHOR TEMPO:", 80, yPos + 40, 25, GOLD);
-        
-        char detalhes[200];
-        snprintf(detalhes, sizeof(detalhes), "%s - %.2fs (%d fases)", 
-                recordes[0].nomeJogador, recordes[0].tempoTotal, recordes[0].fasesCompletas);
-        DrawText(detalhes, 100, yPos + 75, 22, WHITE);
-    }
+    // Borda dourada
+    DrawRectangleLinesEx(botaoRect, 3.0f, corBordaBotao);
     
-    DrawText("Pressione ESC para sair", SCREEN_WIDTH / 2 - MeasureText("Pressione ESC para sair", 20) / 2, SCREEN_HEIGHT - 50, 20, YELLOW);
+    // Texto centralizado no botão
+    const char* textoBotao = "VOLTAR";
+    int tamanhoTextoBotao = 22;
+    int larguraTextoBotao = MeasureText(textoBotao, tamanhoTextoBotao);
+    float textoXBotao = botaoRect.x + (botaoRect.width - larguraTextoBotao) / 2;
+    float textoYBotao = botaoRect.y + (botaoRect.height - tamanhoTextoBotao) / 2;
+    
+    DrawText(textoBotao, (int)textoXBotao, (int)textoYBotao, tamanhoTextoBotao, corTextoBotao);
 }
 
 void desenhaTelaJogoCompleto(Cronometro cronometro) {
@@ -445,4 +567,166 @@ void desenhaTelaMenu(void) {
     
     DrawText("Use o mouse para navegar", SCREEN_WIDTH / 2 - MeasureText("Use o mouse para navegar", 20) / 2, SCREEN_HEIGHT - 100, 20, corPrincipal);
     DrawText("Pressione ESC para sair", SCREEN_WIDTH / 2 - MeasureText("Pressione ESC para sair", 18) / 2, SCREEN_HEIGHT - 70, 18, LIGHTGRAY);
+}
+
+bool verificaCliqueBotaoTutorial(void) {
+    // Verificar se o botão esquerdo do mouse foi pressionado
+    if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        return false;
+    }
+    
+    Vector2 mousePosicao = GetMousePosition();
+    
+    // Dimensões do botão voltar (mesmo estilo dos botões do menu)
+    float larguraBotao = 200.0f;
+    float alturaBotao = 50.0f;
+    float centroX = SCREEN_WIDTH / 2.0f - larguraBotao / 2.0f;
+    float posY = SCREEN_HEIGHT - 100.0f; // 100px da parte inferior
+    
+    Rectangle botaoVoltar = {centroX, posY, larguraBotao, alturaBotao};
+    
+    return CheckCollisionPointRec(mousePosicao, botaoVoltar);
+}
+
+bool verificaCliqueBotaoRanking(void) {
+    // Verificar se o botão esquerdo do mouse foi pressionado
+    if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        return false;
+    }
+    
+    Vector2 mousePosicao = GetMousePosition();
+    
+    // Dimensões do botão voltar (mesmo estilo dos botões do menu)
+    float larguraBotao = 200.0f;
+    float alturaBotao = 50.0f;
+    float centroX = SCREEN_WIDTH / 2.0f - larguraBotao / 2.0f;
+    float posY = SCREEN_HEIGHT - 100.0f; // 100px da parte inferior
+    
+    Rectangle botaoVoltar = {centroX, posY, larguraBotao, alturaBotao};
+    
+    return CheckCollisionPointRec(mousePosicao, botaoVoltar);
+}
+
+void desenhaTelaTutorial(void) {
+    float tempo = GetTime();
+    
+    // Background animado deslizando infinitamente na diagonal (mesmo do menu)
+    if (recursos_carregados && texBackground.id) {
+        // Velocidade do movimento diagonal (em pixels por segundo)
+        float velocidade = 30.0f;
+        
+        // Calcular offset baseado no tempo para movimento contínuo
+        float offsetX = fmod(tempo * velocidade, texBackground.width);
+        float offsetY = fmod(tempo * velocidade * 0.7f, texBackground.height);
+        
+        // Desenhar múltiplas cópias do background para preencher a tela
+        for (int x = -1; x <= 2; x++) {
+            for (int y = -1; y <= 2; y++) {
+                Rectangle src = { 0.0f, 0.0f, (float)texBackground.width, (float)texBackground.height };
+                Rectangle dest = { 
+                    x * texBackground.width - offsetX, 
+                    y * texBackground.height - offsetY, 
+                    (float)texBackground.width, 
+                    (float)texBackground.height 
+                };
+                Vector2 origin = { 0.0f, 0.0f };
+                DrawTexturePro(texBackground, src, dest, origin, 0.0f, WHITE);
+            }
+        }
+    } else {
+        ClearBackground(DARKBLUE);
+    }
+    
+    // Título com movimento flutuante
+    float flutuacao = sin(tempo * 1.5f) * 5.0f;
+    DrawText("TUTORIAL DO JOGO", SCREEN_WIDTH / 2 - MeasureText("TUTORIAL DO JOGO", 30) / 2, 40 + flutuacao, 30, GOLD);
+
+    // Retângulo principal com estilo madeira (centralizado)
+    Color corMadeira = (Color){139, 69, 19, 255};
+    Color corBorda = (Color){255, 215, 0, 255};
+    
+    // Dimensões centralizadas do retângulo
+    float larguraRetangulo = 700.0f;
+    float alturaRetangulo = 450.0f;
+    float centroX = SCREEN_WIDTH / 2.0f - larguraRetangulo / 2.0f;
+    float centroY = SCREEN_HEIGHT / 2.0f - alturaRetangulo / 2.0f + 30.0f; // +30 para ajustar com o título
+    
+    Rectangle retanguloTutorial = {centroX, centroY, larguraRetangulo, alturaRetangulo};
+    
+    // Sombra do retângulo
+    Rectangle sombra = {retanguloTutorial.x + 5, retanguloTutorial.y + 5, retanguloTutorial.width, retanguloTutorial.height};
+    DrawRectangleRec(sombra, (Color){0, 0, 0, 100});
+    
+    // Fundo madeira
+    DrawRectangleRec(retanguloTutorial, corMadeira);
+    
+    // Borda dourada
+    DrawRectangleLinesEx(retanguloTutorial, 4.0f, corBorda);
+    
+    const char *instrucoes[] = {
+        "Objetivo: Coletar todos os tesouros e chegar ao portal de saída.",
+        "Controles:",
+        "- Use as setas do teclado para mover o seu personagem.",
+        "- Evite os inimigos que patrulham o mapa.",
+        "- Use portais para teletransportar-se entre eles.",
+        "Dicas:",
+        "- Fique atento ao tempo e suas vidas!",
+        "Boa sorte, aventureiro!"
+    };
+    
+    // Texto centralizado dentro do retângulo
+    int yPos = (int)(retanguloTutorial.y + 30); // Margem superior dentro do retângulo
+    int totalInstrucoes = sizeof(instrucoes)/sizeof(instrucoes[0]);
+    for (int i = 0; i < totalInstrucoes; i++) {
+        // Texto com cor mais clara para contraste com fundo madeira
+        Color corTexto = (i == 1 || i == 5) ? YELLOW : WHITE; // Destacar "Controles:" e "Dicas:"
+        
+        // Centralizar cada linha de texto
+        int larguraTexto = MeasureText(instrucoes[i], 20);
+        int textoX = (int)(retanguloTutorial.x + (retanguloTutorial.width - larguraTexto) / 2);
+        
+        DrawText(instrucoes[i], textoX, yPos, 20, corTexto);
+        yPos += 40; // Espaçamento entre linhas
+    }
+    
+    // Botão VOLTAR na parte inferior
+    float larguraBotao = 200.0f;
+    float alturaBotao = 50.0f;
+    float centroXBotao = SCREEN_WIDTH / 2.0f - larguraBotao / 2.0f;
+    float posYBotao = SCREEN_HEIGHT - 100.0f;
+    
+    // Verificar hover do mouse no botão
+    Vector2 mousePosicao = GetMousePosition();
+    Rectangle botaoVoltar = {centroXBotao, posYBotao, larguraBotao, alturaBotao};
+    bool hoverBotao = CheckCollisionPointRec(mousePosicao, botaoVoltar);
+    
+    // Cores do botão (mesmo estilo dos botões do menu)
+    Color corMadeiraBotao = (Color){139, 69, 19, 255};
+    Color corBordaBotao = (Color){255, 215, 0, 255};
+    Color corTextoBotao = hoverBotao ? (Color){255, 215, 0, 255} : WHITE;
+    
+    // Efeito hover - botão sobe um pouco
+    float offsetYBotao = hoverBotao ? -3.0f : 0.0f;
+    Rectangle botaoRect = {centroXBotao, posYBotao + offsetYBotao, larguraBotao, alturaBotao};
+    
+    // Sombra do botão (apenas quando não está em hover)
+    if (!hoverBotao) {
+        Rectangle sombraBotao = {botaoRect.x + 3, botaoRect.y + 3, botaoRect.width, botaoRect.height};
+        DrawRectangleRec(sombraBotao, (Color){0, 0, 0, 100});
+    }
+    
+    // Fundo do botão (madeira)
+    DrawRectangleRec(botaoRect, corMadeiraBotao);
+    
+    // Borda dourada
+    DrawRectangleLinesEx(botaoRect, 3.0f, corBordaBotao);
+    
+    // Texto centralizado no botão
+    const char* textoBotao = "VOLTAR";
+    int tamanhoTextoBotao = 22;
+    int larguraTextoBotao = MeasureText(textoBotao, tamanhoTextoBotao);
+    float textoXBotao = botaoRect.x + (botaoRect.width - larguraTextoBotao) / 2;
+    float textoYBotao = botaoRect.y + (botaoRect.height - tamanhoTextoBotao) / 2;
+    
+    DrawText(textoBotao, (int)textoXBotao, (int)textoYBotao, tamanhoTextoBotao, corTextoBotao);
 }

@@ -135,6 +135,23 @@ void atualizaHoverBotao(BotaoMenu* botao);
 AcaoBotaoMenu verificaCliqueBotoesMenu(void);
 
 /**
+ * @brief Desenha a tela de tutorial do jogo
+ */
+void desenhaTelaTutorial(void);
+
+/**
+ * @brief Verifica se o botão voltar do tutorial foi clicado
+ * @return bool true se o botão foi clicado, false caso contrário
+ */
+bool verificaCliqueBotaoTutorial(void);
+
+/**
+ * @brief Verifica se o botão voltar do ranking foi clicado
+ * @return bool true se o botão foi clicado, false caso contrário
+ */
+bool verificaCliqueBotaoRanking(void);
+
+/**
  * @brief Carrega recursos gráficos (texturas) usados pelas telas
  * Deve ser chamado após InitWindow()
  */
