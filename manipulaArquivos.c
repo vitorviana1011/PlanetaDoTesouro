@@ -92,6 +92,7 @@ void contarElementosMapa(Mapa *mapa, int *totalTesouros, int *totalInimigos, Ini
                 (*inimigos)[(*totalInimigos) - 1].y = i;
                 (*inimigos)[(*totalInimigos) - 1].velocidade = 0.5;
                 (*inimigos)[(*totalInimigos) - 1].ultimoMovimento = 0.0;
+                (*inimigos)[(*totalInimigos) - 1].direcao = 0; // Iniciar virado para direita
             }
         }
     }
@@ -226,6 +227,7 @@ void iniciarCronometro(Cronometro *cronometro) {
 }
 
 void iniciarFase(Cronometro *cronometro, int numeroFase) {
+    tocarSomStart();
     cronometro->inicioFase = GetTime();
     cronometro->faseAtual = numeroFase;
 }

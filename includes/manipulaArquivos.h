@@ -47,6 +47,7 @@ typedef struct {
     int y;
     float velocidade;
     double ultimoMovimento;
+    int direcao;  // 0 = direita, 1 = esquerda, 2 = cima, 3 = baixo
 } Inimigo;
 
 typedef struct {

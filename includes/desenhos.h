@@ -162,4 +162,10 @@ void carregarRecursos(void);
  */
 void liberarRecursos(void);
 
+/**
+ * @brief Verifica se o botão VOLTAR da tela de Game Over foi clicado
+ * @return bool true se o botão foi clicado, false caso contrário
+ */
+bool verificaCliqueBotaoGameOver(void);
+
 #endif // DESENHOS_H

@@ -9,7 +9,7 @@ endif
 
 # Configurações básicas
 TARGET = planetadotesouro
-SRCS = planetadotesouro.c manipulaArquivos.c logicaJogo.c inimigo.c desenhos.c
+SRCS = planetadotesouro.c manipulaArquivos.c logicaJogo.c inimigo.c desenhos.c audio.c
 OBJS = $(SRCS:.c=.o)
 CC = gcc
 CFLAGS = -g -Wall -Wextra -std=c99

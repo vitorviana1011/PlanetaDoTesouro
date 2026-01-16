@@ -14,6 +14,7 @@
 #include "includes/logicaJogo.h"
 #include "includes/inimigo.h"
 #include "includes/desenhos.h"
+#include "includes/audio.h"
 #include <string.h>
 
 // Variável global para o nome do jogador
@@ -40,10 +41,43 @@ int main(){
 
     int tesouroColetados = 0;
     int statusJogo = MENU;
+    int statusJogoAnterior = -1; // Para controlar mudanças de estado
 
     SetTargetFPS(60);
 
     while(!WindowShouldClose()){
+        // --- Atualizar áudio ---
+        atualizarMusica();
+        
+        // Controlar música baseado na mudança de estado
+        if (statusJogo != statusJogoAnterior) {
+            switch (statusJogo) {
+                case MENU:
+                case TELA_RANKING:
+                case TUTORIAL:
+                    pararMusicaPrincipal();
+                    iniciarMusicaMenu();
+                    break;
+                case JOGANDO:
+                case ENTRE_FASES:
+                    pararMusicaMenu();
+                    iniciarMusicaPrincipal();
+                    break;
+                case GAME_OVER:
+                    pararMusicaPrincipal();
+                    tocarSomGameOver();
+                    iniciarMusicaMenu();
+                    break;
+                case JOGO_COMPLETO:
+                case TELA_RESULTADOS:
+                case TELA_INPUT_NOME:
+                    pararMusicaPrincipal();
+                    pararMusicaMenu();
+                    break;
+            }
+            statusJogoAnterior = statusJogo;
+        }
+        
         // --- Lógica ---
         movePersonagem(&jogador, &mapa, &statusJogo, &tesouroColetados);
         
@@ -113,15 +147,16 @@ int main(){
             if (statusJogo == JOGANDO || statusJogo == ENTRE_FASES || statusJogo == GAME_OVER) {
                 desenhaMapa(mapa);
             }
-                        
+            
             switch (statusJogo) {
                 case MENU:
                     desenhaTelaMenu();
-                    
+                
                     // Verificar cliques nos botões
                     AcaoBotaoMenu acao = verificaCliqueBotoesMenu();
                     switch (acao) {
                         case ACAO_INICIAR:
+                            tocarSomStart(); // Som de início do jogo
                             statusJogo = JOGANDO;
                             iniciarFase(&cronometro, fase);
                             break;
@@ -139,7 +174,9 @@ int main(){
                     // Manter compatibilidade com teclado
                     switch (GetKeyPressed()) {
                         case KEY_ENTER:
+                            tocarSomStart(); // Som de início do jogo
                             statusJogo = JOGANDO;
+                            iniciarFase(&cronometro, fase);
                             break;
                         case KEY_ESCAPE:
                             CloseWindow();
@@ -160,6 +197,23 @@ int main(){
                     break;
                 case GAME_OVER:
                     desenhaTelaGameOver();
+                    
+                    // Verificar clique no botão VOLTAR AO MENU ou tecla ESC (compatibilidade)
+                    if (verificaCliqueBotaoGameOver() || IsKeyPressed(KEY_ESCAPE)) {
+                        statusJogo = MENU;
+                        fase = 1; // Resetar para a fase 1
+                        tesouroColetados = 0; // Resetar tesouros
+                        
+                        // Recarregar o mapa da fase 1
+                        liberaMapa(&mapa);
+                        if (inimigo != NULL) {
+                            free(inimigo);
+                            inimigo = NULL;
+                        }
+                        mapa = carregaMapa(fase, &inimigo);
+                        jogador = encontrarJogador(mapa, vidasIniciais);
+                        iniciarCronometro(&cronometro);
+                    }
                     break;
                 case TELA_RESULTADOS:
                     desenhaTelaResultados(&cronometro);
@@ -176,6 +230,9 @@ int main(){
                     if (IsKeyPressed(KEY_ESCAPE)) {
                         statusJogo = MENU;
                     }
+
+                    fase = 1;
+
                     break;
                 case TELA_INPUT_NOME:
                     desenhaTelaInputNome(nomeJogador, &cronometro);

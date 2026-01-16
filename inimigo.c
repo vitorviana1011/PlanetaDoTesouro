@@ -24,12 +24,14 @@ void andaInimigo(Jogador *jogador, Inimigo *inimigo, Mapa *mapa) {
         char destino = mapa->dados[inimigo->y][inimigo->x - 1];
         if (destino != '#') {
             novoX = inimigo->x - 1;
+            inimigo->direcao = 1; // Esquerda
         }
     } else if (jogador->x > inimigo->x) {
         // Verificar se pode mover para a direita
         char destino = mapa->dados[inimigo->y][inimigo->x + 1];
         if (destino != '#') {
             novoX = inimigo->x + 1;
+            inimigo->direcao = 0; // Direita
         }
     }
     
@@ -39,12 +41,14 @@ void andaInimigo(Jogador *jogador, Inimigo *inimigo, Mapa *mapa) {
             char destino = mapa->dados[inimigo->y - 1][inimigo->x];
             if (destino != '#') {
                 novoY = inimigo->y - 1;
+                inimigo->direcao = 2; // Cima
             }
         } else if (jogador->y > inimigo->y) {
             // Verificar se pode mover para baixo
             char destino = mapa->dados[inimigo->y + 1][inimigo->x];
             if (destino != '#') {
                 novoY = inimigo->y + 1;
+                inimigo->direcao = 3; // Baixo
             }
         }
     }

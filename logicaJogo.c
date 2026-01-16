@@ -3,6 +3,7 @@
 #include "includes/logicaJogo.h"
 #include "includes/inimigo.h"
 #include "includes/desenhos.h"
+#include "includes/audio.h"
 
 Jogador encontrarJogador(Mapa mapa, int vidas) {
     Jogador jogador = {-1, -1, vidas, 0.0}; // Inicializar com posições inválidas
@@ -115,6 +116,7 @@ void verificaColisaoComInimigos(Jogador *jogador, Inimigo *inimigos, Mapa *mapa,
         for (int i = 0; i < mapa->totalInimigos; i++) {
             if (jogador->x == inimigos[i].x && jogador->y == inimigos[i].y) {
                 // Colisão detectada!
+                tocarSomDano(); // Tocar som de dano
                 jogador->vidas--;
                 jogador->tempoInvencibilidade = tempoAtual + 2.0; // 2 segundos de invencibilidade
                 verificaGameOver(jogador, statusJogo);
@@ -132,7 +134,14 @@ void verificaGameOver(Jogador *jogador, int *statusJogo) {
 
 void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroColetados){
     // Verificar se o jogo acabou antes de permitir movimento
+
+    if (*statusJogo != JOGANDO) {
+        return;
+    }
+
     if (jogador->vidas <= 0) {
+        tocarSomGameOver(); // Som de game over
+        pararMusicaPrincipal(); // Parar música de fundo
         *statusJogo = GAME_OVER;
         return;
     }
@@ -167,6 +176,7 @@ void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroC
     }
 
     if (mapa->dados[novoY][novoX] == 'C') {
+        tocarSomCura(); // Tocar som de cura
         jogador->vidas++;
         mapa->dados[novoY][novoX] = '.';
     }
@@ -178,6 +188,7 @@ void movePersonagem(Jogador *jogador, Mapa *mapa, int *statusJogo, int *tesouroC
 
     // Lógica para coletar tesouro
     if (confereTesouro(mapa, novoX, novoY)) {
+        tocarSomTesouro(); // Tocar som de coleta de tesouro
         (*tesouroColetados)++;
         // Verificar se todos os tesouros foram coletados
         if (*tesouroColetados >= mapa->totalTesouros) {
