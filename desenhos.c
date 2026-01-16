@@ -13,6 +13,7 @@ static Texture2D texJogador = {0};
 static Texture2D texInimigo = {0};
 static Texture2D texTesouro = {0};
 static Texture2D texVida = {0};
+static Texture2D texPortal = {0};
 static Texture2D texChao = {0};
 static Texture2D texParede = {0};
 
@@ -32,6 +33,7 @@ void carregarRecursos(void) {
     texInimigo = LoadTexture("recursos/sprites/inimigo.png");
     texTesouro = LoadTexture("recursos/sprites/tesouro.png");
     texVida = LoadTexture("recursos/sprites/vida.png");
+    texPortal = LoadTexture("recursos/sprites/portal.png");
     texChao = LoadTexture("recursos/sprites/chao.png");
     texParede = LoadTexture("recursos/sprites/parede.png");
 
@@ -49,6 +51,7 @@ void liberarRecursos(void) {
     if (texInimigo.id) UnloadTexture(texInimigo);
     if (texTesouro.id) UnloadTexture(texTesouro);
     if (texVida.id) UnloadTexture(texVida);
+    if (texPortal.id) UnloadTexture(texPortal);
     if (texChao.id) UnloadTexture(texChao);
     if (texParede.id) UnloadTexture(texParede);
     
@@ -62,6 +65,7 @@ void liberarRecursos(void) {
     texInimigo = (Texture2D){0};
     texTesouro = (Texture2D){0};
     texVida = (Texture2D){0};
+    texPortal = (Texture2D){0};
     texChao = (Texture2D){0};
     texParede = (Texture2D){0};
     recursos_carregados = false;
@@ -183,7 +187,30 @@ void desenhaMapa(Mapa mapa) {
                     break;
                 case '1': case '2': case '3': case '4': case '5': 
                 case '6': case '7': case '8': case '9': // Portais numerados
-                    DrawRectangle(x, y, tileSize, tileSize, PURPLE);
+                    // Desenhar chão por baixo
+                    if (recursos_carregados && texChao.id) {
+                        Rectangle srcChao = { 0.0f, 0.0f, (float)texChao.width, (float)texChao.height };
+                        DrawTexturePro(texChao, srcChao, dest, origin, 0.0f, WHITE);
+                    } else {
+                        DrawRectangle(x, y, tileSize, tileSize, GRAY);
+                    }
+                    // Desenhar portal animado por cima
+                    if (recursos_carregados && texPortal.id) {
+                        // Animação do portal: 3 frames horizontais (32x32 cada)
+                        // Sprite do portal: 96x64 (3 frames x 2 linhas)
+                        float tempo = GetTime();
+                        int frameAtual = (int)(tempo * 4.0f) % 3; // 4 FPS, 3 frames
+                        
+                        Rectangle srcPortal = { 
+                            frameAtual * 32.0f, // X: 0, 32, ou 64
+                            0.0f,               // Y: sempre primeira linha
+                            32.0f,              // Largura do frame
+                            32.0f               // Altura do frame
+                        };
+                        DrawTexturePro(texPortal, srcPortal, dest, origin, 0.0f, WHITE);
+                    } else {
+                        DrawRectangle(x, y, tileSize, tileSize, PURPLE);
+                    }
                     break;
                 default:
                     DrawRectangle(x, y, tileSize, tileSize, LIGHTGRAY);

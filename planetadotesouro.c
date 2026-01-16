@@ -27,7 +27,7 @@ int main(){
     carregarRecursos();
     listarMapasDisponiveis();
 
-    int fase = 1;
+    int fase = 5;
     int vidasIniciais = 3;
 
     Inimigo* inimigo = NULL;

@@ -225,12 +225,14 @@ void verificaPortalNumerado(Jogador *jogador, Mapa *mapa, int y, int x) {
     for (int i = 0; i < mapa->totalPortais; i++) {
         if (mapa->portais[i].x1 == x && mapa->portais[i].y1 == y) {
             // Teleportar para a segunda posição
+            tocarSomTeleporte(); // Som de teletransporte
             mapa->dados[jogador->y][jogador->x] = '.';
             jogador->x = mapa->portais[i].x2;
             jogador->y = mapa->portais[i].y2;
             return;
         } else if (mapa->portais[i].x2 == x && mapa->portais[i].y2 == y) {
             // Teleportar para a primeira posição
+            tocarSomTeleporte(); // Som de teletransporte
             mapa->dados[jogador->y][jogador->x] = '.';
             jogador->x = mapa->portais[i].x1;
             jogador->y = mapa->portais[i].y1;
