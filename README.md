@@ -173,19 +173,18 @@ PlanetaDoTesouro/
 ### 📝 Elementos válidos
 | Símbolo | Função | Obrigatório |
 |---------|--------|-------------|
-| `P` | Posição inicial do jogador | ✅ Exatamente 1 |
-| `#` | Parede | ❌ Opcional |
-| `.` | Chão livre | ❌ Opcional |
-| `T` | Tesouro | ✅ Pelo menos 1 |
-| `I` | Inimigo | ❌ Opcional |
-| `C` | Item de cura | ❌ Opcional |
-| `1`-`9` | Portais numerados | ❌ Opcional (pares) |
+| `@` | Posição inicial do jogador |
+| `#` | Parede |
+| `.` | Chão livre |
+| `T` | Tesouro |
+| `I` | Inimigo |
+| `C` | Item de cura |
+| `1`-`9` | Portais numerados |
 
 ### 🔧 Regras técnicas
-- **Dimensão padrão**: 10 linhas x 24 colunas (mapa centralizado)
 - **Arquivos**: `mapas/mapa1.txt`, `mapas/mapa2.txt`, etc.
 - **Detecção automática**: O jogo verifica quais mapas existem
-- **Validação**: Deve haver exatamente 1 jogador (`P`) por mapa
+- **Validação**: Deve haver exatamente 1 jogador (`@`) por mapa
 - **Portais**: Devem ser usados em pares (mesmo número)
 
 ## Comandos Make
